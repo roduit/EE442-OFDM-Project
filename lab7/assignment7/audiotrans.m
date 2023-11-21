@@ -11,7 +11,7 @@
 %   - 'bypass' : no audio transmission, takes txsignal as received signal
 
 % Configuration Values
-conf.audiosystem = 'matlab'; % Values: 'matlab','native','bypass'
+conf.audiosystem = 'bypass'; % Values: 'matlab','native','bypass'
 
 conf.f_s     = 48000;   % sampling rate  
 conf.f_sym   = 100;     % symbol rate
@@ -24,6 +24,13 @@ conf.npreamble  = 100;
 conf.bitsps     = 16;   % bits per audio sample
 conf.offset     = 0;
 
+%AJOUTE PAR NOUS%%%%%%%%%
+conf.tx_filterlen = 20;
+conf.rolloff = 0.22;
+conf.rx_filterlen = 20;
+conf.SNR = 100;
+%%%%%%%%%%%%%%%%%%%%%%
+    
 % Init Section
 % all calculations that you only have to do once
 conf.os_factor  = conf.f_s/conf.f_sym;

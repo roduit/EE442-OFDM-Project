@@ -13,10 +13,28 @@ function [txsignal conf] = tx(txbits,conf,k)
 %   k       : Frame index
 %
 
+%Create preamble and map to BPSK
+preamble = lfsr_framesync(conf.npreamble);
+preamble_bpsk = preamble * 2 - 1;
 
-% dummy 400Hz sinus generation
-time = 1:1/conf.f_s:4;
-txsignal = 0.3*sin(2*pi*400 * time.');
+% Map tx into QPSK
+GrayMap = 1/sqrt(2) * [(-1-1j) (-1+1j) ( 1-1j) ( 1+1j)];
+%reshape tx
+source_tx = reshape(txbits,2,conf.nbits/2)';
+mappedGray = GrayMap(bi2de(source_tx, 'left-msb')+1).';
+
+%Create signal composed of preamble and bits
+signal = vertcat(preamble_bpsk, mappedGray);
+
+
+symbol_up = upsample(signal,conf.os_factor);
+
+% base-band pulse shaping
+
+filtered_tx_signal = matched_filter(symbol_up,conf.os_factor,conf.tx_filterlen);
 
 %Up conversion
-txsignal = real(txsignal) .* cos(2*pi*conf.f_c*time)' - imag(txsignal) .* sin(2*pi*conf.f_c*time)';
+time = 0:1/conf.f_s:(length(filtered_tx_signal)/conf.f_s)-1/conf.f_s;
+txsignal = real(filtered_tx_signal) .* cos(2*pi*conf.f_c*time)' - imag(filtered_tx_signal) .* sin(2*pi*conf.f_c*time)';
+
+
