@@ -32,11 +32,13 @@ filtered_rx_signal = matched_filter(r_bb, conf.os_factor, conf.rx_filterlen);
 [data_idx theta magnitude] = frame_sync(conf,filtered_rx_signal, conf.os_factor); % Index of the first data symbol
 
 % downsampling
-sampled_signal = filtered_rx_signal(1+conf.rx_filterlen+conf.tx_filterlen + data_idx:conf.os_factor:end-conf.rx_filterlen - conf.tx_filterlen);
+start = 1+conf.rx_filterlen+conf.tx_filterlen + data_idx;
+end_ = start + conf.os_factor * conf.nbits/2 -1;
+sampled_signal = filtered_rx_signal(start:conf.os_factor:end_);
 %
 
 %Demap 
-demap = demapper(sampled_signal);
+rxbits = demapper(sampled_signal);
 
 
 
