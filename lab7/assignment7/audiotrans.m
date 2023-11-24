@@ -25,7 +25,7 @@ conf.bitsps     = 16;   % bits per audio sample
 conf.offset     = 0;
 
 %AJOUTE PAR NOUS%%%%%%%%%
-conf.tx_filterlen = 20;
+conf.tx_filterlen = 30;
 conf.rolloff = 0.22;
 conf.rx_filterlen = 20;
 conf.SNR = 100;
