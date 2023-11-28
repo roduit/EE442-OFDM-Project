@@ -31,7 +31,7 @@ conf.offset     = 0;
 conf.tx_filterlen = 60;
 conf.rx_filterlen = 60;
 conf.rolloff = 0.22;
-conf.SNR_db = 10;
+conf.SNR_db = 80;
 conf.SNR_lin = 10^(conf.SNR_db/10);
 % ---------------------------
     
