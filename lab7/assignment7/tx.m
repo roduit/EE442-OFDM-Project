@@ -42,5 +42,10 @@ filtered_tx_signal = matched_filter(noisy_signal,conf.os_factor,conf.tx_filterle
 %Up conversion
 time = 0:1/conf.f_s:(length(filtered_tx_signal)/conf.f_s)-1/conf.f_s;
 txsignal = real(filtered_tx_signal) .* cos(2*pi*conf.f_c*time)' - imag(filtered_tx_signal) .* sin(2*pi*conf.f_c*time)';
+% Calculate the RMS value
+rms_value = rms(txsignal);
+
+% Normalize the signal
+txsignal = txsignal / rms_value;
 
 
