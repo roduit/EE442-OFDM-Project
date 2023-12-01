@@ -1,7 +1,6 @@
-function [outputArg1,outputArg2] = cyclic_prefix(inputArg1,inputArg2)
+function [cp_signal] = cyclic_prefix(signal, cp_length)
 %CYCLIC_PREFIX Summary of this function goes here
 %   Detailed explanation goes here
-outputArg1 = inputArg1;
-outputArg2 = inputArg2;
+    cp_signal = vertcat(signal(end-cp_length+1:end), signal);
 end
 
