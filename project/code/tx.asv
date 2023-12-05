@@ -13,10 +13,7 @@ function [txsignal_rf] = tx(tx_bitstream, conf)
 
     % Pulse shape for preamble
     preamble_shaped = matched_filter(preamble_up, conf.os_factor_preamb, conf.matched_filter_length_tx, conf);
-    
-    %Normalize the preamble
-    preamble_shaped = preamble_shaped / rms(preamble_shaped);
-  
+    preamble_shaped = preamble_shaped(240:)
     % Generate training sequence
     training_seq = preamble_gen(conf.bit_per_packet);
 
@@ -45,9 +42,6 @@ function [txsignal_rf] = tx(tx_bitstream, conf)
     % Parallel to serial conversion
     
     tx_serial_qpsk = parallel2series(tx_signal);
-
-    % Normalize the signal
-    tx_serial_qpsk = tx_serial_qpsk / rms(tx_serial_qpsk);
 
     tx_signal_down = vertcat(preamble_shaped, tx_serial_qpsk);
 
