@@ -45,6 +45,9 @@ bitstream = randi([0, 1], conf.bit_per_packet * conf.nb_packets, 1);
 
 % RF data generation
 tx_rf = tx(bitstream, conf);
+bitstream_rx = rx(tx_rf,conf);
+
+ber = sum(bitstream ~= bitstream_rx) / length(bitstream)
 
 % Plot RF data
 figure;

@@ -13,7 +13,7 @@ function [after] = ofdmlowpass(before,conf,f)
 % it might need tweaking.
 %
 
-h_lp=design(fdesign.lowpass('N,F3db',1,f,2*conf.f_s),'alliir');
+h_lp=design(fdesign.lowpass('N,F3db',1,f,2*conf.sampling_freq),'alliir');
 B=h_lp.ScaleValues(1);
 A=[1,h_lp.sosMatrix(5)];
 after =filter(B,A,before);
