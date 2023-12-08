@@ -6,26 +6,24 @@ conf.preamble_length = 100;
 
 conf.nb_frames = 1000;
 conf.nb_packets = 2;
-if mod(conf.nb_packets,2) ~= 0
-    disp('WARNING nb_packets: Number of packets should be a multiple of 2'); 
-end
-conf.packet_per_frame = 10;                 % Number of packets per frame
-conf.bit_per_packet = 256;                  % Number of bits per packet (or carriers)
-conf.cp_length = conf.bit_per_packet / 2;      % [samples]
+conf.packet_per_frame = 2;                 % Number of packets per frame
+conf.symb_per_packet = 256;                  % Number of symbols per packet (or carriers)
+conf.bits_per_packet = conf.symb_per_packet * 2; %Number of bits per paccket
+conf.cp_length = conf.symb_per_packet / 2;      % [samples]
 
 conf.carrier_freq = 8e3;                    % [Hz]
 conf.spacing_freq = 5;                      % [Hz]
 conf.sampling_freq = 48e3;                  % [Hz]
 
-conf.BW = conf.spacing_freq * conf.bit_per_packet; % Bandwidth [Hz]
+conf.BW = conf.spacing_freq * conf.symb_per_packet; % Bandwidth [Hz]
 
 conf.symbol_rate_ofdm = 1/conf.BW;                      % [s]
 conf.symbol_rate_preamb = 1000;                         % [Hz]
 
-conf.ofdm_symbol_period = conf.bit_per_packet * conf.symbol_rate_ofdm; % [s]
+conf.ofdm_symbol_period = conf.symb_per_packet * conf.symbol_rate_ofdm; % [s]
 
 
-conf.os_factor_ofdm = conf.sampling_freq / (conf.spacing_freq * conf.bit_per_packet); % Oversampling factor OFDM
+conf.os_factor_ofdm = conf.sampling_freq / (conf.spacing_freq * conf.symb_per_packet); % Oversampling factor OFDM
 conf.os_factor_preamb = conf.sampling_freq / conf.symbol_rate_preamb;                        % Oversampling factor preamble
 
 if mod(conf.os_factor_preamb,1) ~= 0
@@ -41,7 +39,7 @@ conf.matched_filter_length_rx = conf.os_factor_preamb * 3;
 
 
 % Transmit
-bitstream = randi([0, 1], conf.bit_per_packet * conf.nb_packets, 1);
+bitstream = randi([0, 1], conf.bits_per_packet * conf.nb_packets, 1);
 
 % RF data generation
 tx_rf = tx(bitstream, conf);
