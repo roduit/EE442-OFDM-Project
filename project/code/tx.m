@@ -13,6 +13,8 @@ function [txsignal_rf] = tx(tx_bitstream, conf)
 
     % Pulse shape for preamble
     preamble_shaped = matched_filter(preamble_up, conf.os_factor_preamb, conf.matched_filter_length_tx, conf);
+
+    preamble_shaped = preamble_shaped(1 + conf.matched_filter_length_tx : end - conf.matched_filter_length_tx);
     
     %Normalize the preamble
     preamble_shaped = preamble_shaped / rms(preamble_shaped);
@@ -32,9 +34,8 @@ function [txsignal_rf] = tx(tx_bitstream, conf)
     % Serial to parallel conversion
     tx_parallel_qpsk = series2parallel(tx_qpsk, conf.symb_per_packet);
 
-    % for -> ifft, cp, parallel2series
-    % concatenate the series signals
-    tx_signal = zeros(conf.cp_length+conf.symb_per_packet*conf.os_factor_ofdm,conf.nb_packets+1);
+    % Concatenate the series signals
+    tx_signal = zeros(conf.cp_length + conf.symb_per_packet * conf.os_factor_ofdm, conf.nb_packets + 1);
     for ii=1:conf.nb_packets+1
         frame = tx_parallel_qpsk(:,ii);
         frame_ifft = osifft(frame, conf.os_factor_ofdm);
@@ -54,11 +55,13 @@ function [txsignal_rf] = tx(tx_bitstream, conf)
     %Up conversion
     time = 0:1/conf.sampling_freq:(length(tx_signal_down)/conf.sampling_freq)-1/conf.sampling_freq;
     txsignal = real(tx_signal_down) .* cos(2*pi*conf.carrier_freq*time)' - imag(tx_signal_down) .* sin(2*pi*conf.carrier_freq*time)';
+    
     % Calculate the RMS value
     rms_value = rms(txsignal);
 
     % Normalize the signal
     txsignal_rf = txsignal / rms_value;
+    %txsignal_rf = txsignal;
 
 end
 

@@ -1,19 +1,20 @@
 clear;
 clc
+rng(123);
 
 % Config file
 conf.preamble_length = 100;
 
 conf.nb_frames = 1000;
-conf.nb_packets = 2;
-conf.packet_per_frame = 2;                 % Number of packets per frame
-conf.symb_per_packet = 256;                  % Number of symbols per packet (or carriers)
-conf.bits_per_packet = conf.symb_per_packet * 2; %Number of bits per paccket
-conf.cp_length = conf.symb_per_packet / 2;      % [samples]
+conf.nb_packets = 100;
+conf.packet_per_frame = conf.nb_packets;                          % Number of packets per frame
+conf.symb_per_packet = 256;                         % Number of symbols per packet (or carriers)
+conf.bits_per_packet = conf.symb_per_packet * 2;    % Number of bits per paccket
+conf.cp_length = conf.symb_per_packet / 2;          % [samples]
 
-conf.carrier_freq = 8e3;                    % [Hz]
-conf.spacing_freq = 5;                      % [Hz]
-conf.sampling_freq = 48e3;                  % [Hz]
+conf.carrier_freq = 8e3;                            % [Hz]
+conf.spacing_freq = 5;                              % [Hz]
+conf.sampling_freq = 48e3;                          % [Hz]
 
 conf.BW = conf.spacing_freq * conf.symb_per_packet; % Bandwidth [Hz]
 
@@ -33,7 +34,7 @@ end
 conf.rolloff_factor = 0.22;                 % Roll-off factor (RRC)
 
 conf.matched_filter_length_tx = conf.os_factor_preamb * 5;
-conf.matched_filter_length_rx = conf.os_factor_preamb * 3;
+conf.matched_filter_length_rx = conf.os_factor_preamb * 6;
 
 
 
@@ -43,11 +44,28 @@ bitstream = randi([0, 1], conf.bits_per_packet * conf.nb_packets, 1);
 
 % RF data generation
 tx_rf = tx(bitstream, conf);
-bitstream_rx = rx(tx_rf,conf);
 
-ber = sum(bitstream ~= bitstream_rx) / length(bitstream)
+tx_rf_augmented = [ zeros(conf.sampling_freq,1) ; tx_rf ;  zeros(conf.sampling_freq,1) ];
 
-% Plot RF data
+bitstream_rx = rx(tx_rf_augmented, conf);
+
+ber = sum(bitstream ~= bitstream_rx) %/ length(bitstream)
+
+% figure;
+% plot(tx_rf)
+% title('Transmitted RF Data');
+% xlabel('Sample Index');
+% ylabel('Amplitude');
+% 
+% figure;
+% plot(tx_rf_augmented)
+% title('Transmitted RF Data with padding');
+% xlabel('Sample Index');
+% ylabel('Amplitude');
+
+
+%{
+ % Plot RF data
 figure;
 plot(tx_rf);
 title('Transmitted RF Data');
@@ -74,7 +92,9 @@ hold off;
 title('Samples from tx\_rf with Colors');
 xlabel('Sample Index');
 ylabel('Value');
-legend('Preamble (Green)', 'Training (Red)', 'Packet 1 (Magenta)');
+legend('Preamble (Green)', 'Training (Red)', 'Packet 1 (Magenta)'); 
+%}
+
 
 
 
