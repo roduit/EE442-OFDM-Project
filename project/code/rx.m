@@ -46,7 +46,7 @@ function [rx_bitstream] = rx(rx_signal, conf)
 
     for k = 1:conf.nb_packets
         deltaTheta = 1/4.*angle(-rx_data(:, k).^4) + pi/2*(-1:4);
-        [~, ind] = min(abs(deltaTheta - channel_phase_est(:, k)));
+        [~, ind] = min(abs(deltaTheta - channel_phase_est(:, k)), [], 2);
         theta = deltaTheta(ind);
         channel_phase_est(:, k+1) = mod(0.01*theta + 0.99*channel_phase_est(:, k), 2*pi);
     end

@@ -4,5 +4,5 @@ Project for the course EE442 - Wireless receivers: algorithms and architectures
 ## TODO 
 
 ## Question
-- comment on doit enlever l'offset du à la conv avec le MF du preamble ?
-- est-ce que faire un MF sur tout le signal c'est une bonne idée ? On doit le faire 2 fois (pour enlever l'effet) ?
+- Is it ok to match filtered the whole sequence to detect preample but then use the signal without match filter
+- non-zero phase shift in ideal case, is it normal ? Where can the effect come from ? FFT ? Lowpass ?
