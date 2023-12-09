@@ -7,3 +7,4 @@ function filtered_signal = matched_filter(signal, os_factor, mf_length, conf)
     
     h = rrc(os_factor, rolloff_factor, mf_length);
     filtered_signal = conv(h, signal);
+    filtered_signal = filtered_signal(1 + mf_length : end - mf_length);

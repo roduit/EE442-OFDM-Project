@@ -14,5 +14,8 @@ for i = 1:preamble_length
     state = circshift(state, -1);
     state(end) = feedback;
 end
+
+preamble = bit2bpsk(preamble);
+
 end
 
