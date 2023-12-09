@@ -4,10 +4,10 @@ function [beginning_of_data] = frame_sync(rx_signal, conf)
     % rx_signal is the noisy received signal, and conf.os_factor_preamb is the oversampling factor (conf.os_factor_preamb=1 in chapter 2, conf.os_factor_preamb=4 in all later chapters).
     % The returned value is the index of the first data symbol in rx_signal.
     
-    if (rx_signal(1) == 0)
-        warning('Signal seems to be noise-free. The frame synchronizer will not work in this case.');
-        
-    end
+    % if (rx_signal(1) == 0)
+    %     warning('Signal seems to be noise-free. The frame synchronizer will not work in this case.');
+    % 
+    % end
     
     detection_threshold = 15;
     
