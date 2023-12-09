@@ -6,4 +6,4 @@ function filtered_signal = matched_filter(signal, os_factor, mf_length, conf)
     rolloff_factor = conf.rolloff_factor;
     
     h = rrc(os_factor, rolloff_factor, mf_length);
-    filtered_signal = conv(h, signal);
+    filtered_signal = conv(signal, h, "same");

@@ -14,7 +14,7 @@ function [txsignal_rf] = tx(tx_bitstream, conf)
     % Pulse shape for preamble
     preamble_shaped = matched_filter(preamble_up, conf.os_factor_preamb, conf.matched_filter_length_tx, conf);
 
-    preamble_shaped = preamble_shaped(1 + conf.matched_filter_length_tx : end - conf.matched_filter_length_tx);
+    %preamble_shaped = preamble_shaped(1 + conf.matched_filter_length_tx : end - conf.matched_filter_length_tx);
     
     %Normalize the preamble
     preamble_shaped = preamble_shaped / rms(preamble_shaped);
