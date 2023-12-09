@@ -5,8 +5,6 @@ function [rx_bitstream] = rx(rx_signal, conf)
     % For now we ignore the premable and the training sequence
     % os_pream_length = conf.preamble_length*conf.os_factor_preamb + 2*conf.matched_filter_length_tx;
 
-    training_seq = preamble_gen(conf.symb_per_packet);
-
     os_training_length = conf.symb_per_packet * conf.os_factor_ofdm + conf.cp_length;
 
     % Down-conversion
@@ -37,7 +35,7 @@ function [rx_bitstream] = rx(rx_signal, conf)
         rx_symbols(:, ii) = rx_fft;
 
     end
-    training_sequence_bitstream = bpsk2bit(rx_symbols(:, 1));
+    training_sequence_bitstream = bit2bosk(bpsk2bit(rx_symbols(:, 1));
 
     rx_symbols_true = rx_symbols(:, 2:end);
     rx_bitstream = qpsk2bit(rx_symbols_true(:));
