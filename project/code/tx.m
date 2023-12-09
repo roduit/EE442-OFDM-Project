@@ -30,6 +30,7 @@ function [txsignal_rf] = tx(tx_bitstream, conf)
 
     % Concatenate training sequence and bitstream
     tx_qpsk = vertcat(training_seq_bpsk, bitstream_qpsk);
+    %tx_qpsk = tx_qpsk .* exp(1j*pi/2);
 
     % Serial to parallel conversion
     tx_parallel_qpsk = series2parallel(tx_qpsk, conf.symb_per_packet);
@@ -61,7 +62,7 @@ function [txsignal_rf] = tx(tx_bitstream, conf)
 
     % Normalize the signal
     txsignal_rf = txsignal / rms_value;
-    %txsignal_rf = txsignal;
+    %txsignal_rf = tx_signal_down;
 
 end
 

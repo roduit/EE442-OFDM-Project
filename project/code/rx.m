@@ -49,7 +49,11 @@ function [rx_bitstream] = rx(rx_signal, conf)
         [~, ind] = min(abs(deltaTheta - channel_phase_est(:, k)), [], 2);
         theta = deltaTheta(ind);
         channel_phase_est(:, k+1) = mod(0.01*theta + 0.99*channel_phase_est(:, k), 2*pi);
+        %channel_phase_est(:, k+1) = mod(theta, 2*pi);
     end
+
+    rx_data = (rx_data ./ channel_mag_est) .* exp(-1j .* channel_phase_est(:, 2:end));
+    
     
     
     rx_bitstream = qpsk2bit(rx_data(:));
