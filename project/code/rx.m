@@ -2,10 +2,8 @@ function [rx_bitstream] = rx(rx_signal, conf)
     % rx_signal: received signal
     % conf: configuration struct
 
-    % For now we ignore the premable and the training sequence
-    % os_pream_length = conf.preamble_length*conf.os_factor_preamb + 2*conf.matched_filter_length_tx;
-
     training_seq = preamble_gen(conf.symb_per_packet);
+    training_seq = bit2bpsk(training_seq);
 
     os_training_length = conf.symb_per_packet * conf.os_factor_ofdm + conf.cp_length;
 
@@ -14,15 +12,11 @@ function [rx_bitstream] = rx(rx_signal, conf)
     r_dc = rx_signal .* exp(-1j*2*pi*conf.carrier_freq*time');
 
     % Low-pass filtering
-    rx_signal = 2 * ofdmlowpass(r_dc,conf,conf.BW * 1.5);
+    rx_signal = 2 * ofdmlowpass(r_dc,conf,conf.BW * 2);
 
     % Apply MF
-    %rx_signal_MF = rx_signal;
     rx_signal_MF = matched_filter(rx_signal, conf.os_factor_preamb, conf.matched_filter_length_rx, conf);
-    % rx_signal_MF = rx_signal_MF(1 + conf.matched_filter_length_rx: end - conf.matched_filter_length_rx);
 
-    % We need to remove the matched filter length because frame_sync gives us the data with padding
-    % beginning_of_data = frame_sync(rx_signal_MF, conf) - conf.matched_filter_length_rx;
     beginning_of_data = frame_sync(rx_signal_MF, conf);
 
     rx_signal_MF = rx_signal(beginning_of_data : beginning_of_data + os_training_length + conf.packet_per_frame * (conf.symb_per_packet * conf.os_factor_ofdm + conf.cp_length) - 1);
@@ -37,10 +31,28 @@ function [rx_bitstream] = rx(rx_signal, conf)
         rx_symbols(:, ii) = rx_fft;
 
     end
-    training_sequence_bitstream = bpsk2bit(rx_symbols(:, 1));
+    
+    % Extract the training sequence
+    rx_training_sequence = rx_symbols(:, 1);
 
-    rx_symbols_true = rx_symbols(:, 2:end);
-    rx_bitstream = qpsk2bit(rx_symbols_true(:));
+    % Extract the data symbol sequence
+    rx_data = rx_symbols(:, 2:end);
+    
+    % Estimate the channel
+    channel = rx_training_sequence ./ training_seq;
+    channel_phase_est = zeros(size(rx_symbols));
+    channel_phase_est(:, 1) = mod(angle(channel), 2*pi);
+    channel_mag_est = abs(channel);
+
+    for k = 1:conf.nb_packets
+        deltaTheta = 1/4.*angle(-rx_data(:, k).^4) + pi/2*(-1:4);
+        [~, ind] = min(abs(deltaTheta - channel_phase_est(:, k)));
+        theta = deltaTheta(ind);
+        channel_phase_est(:, k+1) = mod(0.01*theta + 0.99*channel_phase_est(:, k), 2*pi);
+    end
+    
+    
+    rx_bitstream = qpsk2bit(rx_data(:));
 
 end
     
