@@ -32,17 +32,27 @@ function [rx_bitstream] = rx(rx_signal, conf)
 
     end
     
-    % Extract the training sequence and compute the phase tracking
+    % Extract the training sequence
     rx_training_sequence = rx_symbols(:, 1);
-    phase_estimation = mod(angle(rx_training_sequence ./ training_seq), 2*pi);
-    magnitude_estimation = abs(rx_training_sequence ./ training_seq);
 
-    training_seq_corrected = rx_training_sequence ./ magnitude_estimation .* exp(-1j*phase_estimation);
-
+    % Extract the data symbol sequence
+    rx_data = rx_symbols(:, 2:end);
     
-    % Extract the data symbol sequence and compute the bitstream
-    rx_symbols_true = rx_symbols(:, 2:end);
-    rx_bitstream = qpsk2bit(rx_symbols_true(:));
+    % Estimate the channel
+    channel = rx_training_sequence ./ training_seq;
+    channel_phase_est = zeros(size(rx_symbols));
+    channel_phase_est(:, 1) = mod(angle(channel), 2*pi);
+    channel_mag_est = abs(channel);
+
+    for k = 1:conf.nb_packets
+        deltaTheta = 1/4.*angle(-rx_data(:, k).^4) + pi/2*(-1:4);
+        [~, ind] = min(abs(deltaTheta - channel_phase_est(:, k)));
+        theta = deltaTheta(ind);
+        channel_phase_est(:, k+1) = mod(0.01*theta + 0.99*channel_phase_est(:, k), 2*pi);
+    end
+    
+    
+    rx_bitstream = qpsk2bit(rx_data(:));
 
 end
     
