@@ -2,20 +2,28 @@ function [txsignal_rf] = tx(tx_bitstream, conf)
 % tx_bitstream: bitstream to be transmitted
 % tx_signal: signal to be transmitted
 
-    % Generate preamble already in BPSK
-    preamble_bpsk = preamble_gen(conf.preamble_length);
+    % Generate preamble
+    preamble = preamble_gen(conf.preamble_length);
+
+    % Convert preamble to BPSK
+    preamble_bpsk = bit2bpsk(preamble);
 
     % Upsample preamble
     preamble_up = upsample(preamble_bpsk, conf.os_factor_preamb);
 
     % Pulse shape for preamble
     preamble_shaped = matched_filter(preamble_up, conf.os_factor_preamb, conf.matched_filter_length_tx, conf);
+
+    preamble_shaped = preamble_shaped(1 + conf.matched_filter_length_tx : end - conf.matched_filter_length_tx);
     
     %Normalize the preamble
     preamble_shaped = preamble_shaped / rms(preamble_shaped);
   
-    % Generate training sequence already in BPSK
-    training_seq_bpsk = preamble_gen(conf.symb_per_packet);
+    % Generate training sequence
+    training_seq = preamble_gen(conf.symb_per_packet);
+
+    % Convert training sequence to BPSK
+    training_seq_bpsk = bit2bpsk(training_seq);
 
     % Convert bitstream to QPSK
     bitstream_qpsk = bit2qpsk(tx_bitstream);
@@ -37,14 +45,14 @@ function [txsignal_rf] = tx(tx_bitstream, conf)
 
     % Parallel to serial conversion
     
-    tx_serial_qpsk = parallel2series(tx_signal);
-    
+    %tx_serial_qpsk = parallel2series(tx_signal);
+    tx_serial_qpsk = tx_signal(:);
     % Normalize the signal
     tx_serial_qpsk = tx_serial_qpsk / rms(tx_serial_qpsk);
 
     tx_signal_down = vertcat(preamble_shaped, tx_serial_qpsk);
 
-    % Up conversion
+    %Up conversion
     time = 0:1/conf.sampling_freq:(length(tx_signal_down)/conf.sampling_freq)-1/conf.sampling_freq;
     txsignal = real(tx_signal_down) .* cos(2*pi*conf.carrier_freq*time)' - imag(tx_signal_down) .* sin(2*pi*conf.carrier_freq*time)';
     
@@ -53,6 +61,7 @@ function [txsignal_rf] = tx(tx_bitstream, conf)
 
     % Normalize the signal
     txsignal_rf = txsignal / rms_value;
+    %txsignal_rf = txsignal;
 
 end
 
