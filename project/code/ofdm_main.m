@@ -5,8 +5,8 @@ rng(123);
 % Config file
 conf.preamble_length = 100;
 
-conf.nb_frames = 10;
-conf.nb_packets = 10;
+conf.nb_frames = 1;
+conf.nb_packets = 11;
 conf.packet_per_frame = conf.nb_packets;                          % Number of packets per frame
 conf.symb_per_packet = 256;                         % Number of symbols per packet (or carriers)
 conf.bits_per_packet = conf.symb_per_packet * 2;    % Number of bits per paccket
@@ -40,7 +40,7 @@ conf.matched_filter_length_rx = conf.os_factor_preamb * 6;
 
 
 % Transmit
-bitstream = randi([0, 1], conf.bits_per_packet * conf.nb_packets, 1);
+bitstream = randi([0, 1], conf.bits_per_packet * conf.nb_packets, conf.nb_frames);
 
 % RF data generation
 tx_rf = tx(bitstream, conf);
