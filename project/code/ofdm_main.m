@@ -6,7 +6,7 @@ rng(123);
 conf.preamble_length = 100;
 
 conf.nb_frames = 1;
-conf.nb_packets = 11;
+conf.nb_packets = 12;
 conf.packet_per_frame = conf.nb_packets;                          % Number of packets per frame
 conf.symb_per_packet = 256;                         % Number of symbols per packet (or carriers)
 conf.bits_per_packet = conf.symb_per_packet * 2;    % Number of bits per paccket
