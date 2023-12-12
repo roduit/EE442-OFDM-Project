@@ -1,7 +1,7 @@
 function [txsignal_rf] = tx(tx_bitstream, conf)
 % tx_bitstream: bitstream to be transmitted
 % tx_signal: signal to be transmitted
-    row_dimension = conf.preamble_length * conf.os_factor_preamb + (conf.symb_per_packet * conf.os_factor_ofdm + conf.cp_length) * (conf.packet_per_frame + 1);
+    row_dimension = conf.preamble_length * conf.os_factor_preamb + (conf.symb_per_packet * conf.os_factor_ofdm + conf.cp_length) * (conf.packet_per_frame + 1) + conf.frame_gap;
     tot_signal = zeros(row_dimension,conf.nb_frames);
     % Generate preamble
     for ii=1:conf.nb_frames
@@ -53,7 +53,7 @@ function [txsignal_rf] = tx(tx_bitstream, conf)
         % Normalize the signal
         tx_serial_qpsk = tx_serial_qpsk / rms(tx_serial_qpsk);
     
-        tx_signal_down = vertcat(preamble_shaped, tx_serial_qpsk);
+        tx_signal_down = vertcat(preamble_shaped, tx_serial_qpsk, zeros(conf.frame_gap,1));
         tot_signal(:,ii) = tx_signal_down;
     end
 
@@ -70,4 +70,3 @@ function [txsignal_rf] = tx(tx_bitstream, conf)
     %txsignal_rf = tx_signal_down;
 
 end
-

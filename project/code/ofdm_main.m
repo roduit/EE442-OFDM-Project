@@ -5,8 +5,9 @@ rng(123);
 % Config file
 conf.preamble_length = 100;
 
-conf.nb_frames = 1;
+conf.nb_frames = 20;
 conf.nb_packets = 12;
+conf.frame_gap = 10000;
 conf.packet_per_frame = conf.nb_packets;                          % Number of packets per frame
 conf.symb_per_packet = 256;                         % Number of symbols per packet (or carriers)
 conf.bits_per_packet = conf.symb_per_packet * 2;    % Number of bits per paccket
@@ -49,7 +50,7 @@ tx_rf_augmented = [ zeros(conf.sampling_freq,1) ; tx_rf ;  zeros(conf.sampling_f
 
 bitstream_rx = rx(tx_rf_augmented, conf);
 
-ber = sum(bitstream ~= bitstream_rx) %/ length(bitstream)
+ber = sum(bitstream ~= bitstream_rx) / length(bitstream)
 
 % figure;
 % plot(tx_rf)
