@@ -1,8 +1,11 @@
-% -*- file name: ofdm_main -*-
-% -*- author(s) : Vincent Roduit, Filippo Quadri -*-
-% -*- date : 2023-12-02 -*-
-% -*- Last revision: 2023-12-13 (Vincent Roduit)-*-
-% -*- Description: Main code that produces OFDM module -*-
+% % % % %
+% Wireless Receivers: algorithms and architectures
+% Ecole Polytechnique Federale de Lausanne
+% Professor : Andreas Burg
+% Semester : Fall 2023
+% Project : OFDM transmission and reception
+% Authors : Vincent Roduit, Filippo Quadri
+% % % % %
 
 clear;
 clc
@@ -14,6 +17,17 @@ gray_lena = rgb2gray(lena_image);
 
 %% *-* Config parameters *-*
 
+% Audio transmission characteristics
+%   3 operating modes:
+%   - 'matlab' : generic MATLAB audio routines (unreliable under Linux)
+%   - 'native' : OS native audio system
+%       - ALSA audio tools, most Linux distrubtions
+%       - builtin WAV tools on Windows 
+%   - 'bypass' : no audio transmission, takes txsignal as received signal
+conf.audiosystem = 'matlab'; % Values: 'matlab','native','bypass'
+conf.bitsps     = 16;
+
+% Image characteristics
 conf.original_image = size(gray_lena);
 
 % Frame characteristics 
@@ -63,11 +77,58 @@ bitstream = image2bitstream(conf, gray_lena);
 tx_rf = tx(bitstream, conf);
 
 % pad signal with zeros to simulate delay
-tx_rf_augmented = [ zeros(conf.sampling_freq,1) ; tx_rf ;  zeros(conf.sampling_freq,1) ];
+rawtxsignal = [ zeros(conf.sampling_freq,1) ; tx_rf ;  zeros(conf.sampling_freq,1) ];
+
+txdur = length(rawtxsignal)/conf.sampling_freq; % calculate length of transmitted signal
+audiowrite('out.wav',rawtxsignal,conf.sampling_freq)
+
+% Platform native audio mode 
+if strcmp(conf.audiosystem,'native')
+    
+    % Windows WAV mode 
+    if ispc()
+        disp('Windows WAV');
+        wavplay(rawtxsignal,conf.sampling_freq,'async');
+        disp('Recording in Progress');
+        rawrxsignal = wavrecord((txdur+1)*conf.sampling_freq,conf.sampling_freq);
+        disp('Recording complete')
+        rxsignal = rawrxsignal(1:end,1);
+
+    % ALSA WAV mode 
+    elseif isunix()
+        disp('Linux ALSA');
+        cmd = sprintf('arecord -c 2 -r %d -f s16_le  -d %d in.wav &',conf.sampling_freq,ceil(txdur)+1);
+        system(cmd); 
+        disp('Recording in Progress');
+        system('aplay  out.wav')
+        pause(2);
+        disp('Recording complete')
+        rawrxsignal = audioread('in.wav');
+        rxsignal    = rawrxsignal(1:end,1);
+    end
+    
+% MATLAB audio mode
+elseif strcmp(conf.audiosystem,'matlab')
+    disp('MATLAB generic');
+    playobj = audioplayer(rawtxsignal,conf.sampling_freq,conf.bitsps);
+    recobj  = audiorecorder(conf.sampling_freq,conf.bitsps,1);
+    record(recobj);
+    disp('Recording in Progress');
+    playblocking(playobj)
+    pause(0.5);
+    stop(recobj);
+    disp('Recording complete')
+    rawrxsignal  = getaudiodata(recobj,'int16');
+    rxsignal     = double(rawrxsignal(1:end))/double(intmax('int16')) ;
+    
+elseif strcmp(conf.audiosystem,'bypass')
+    rawrxsignal = rawtxsignal(:,1);
+    rxsignal    = rawrxsignal;
+end
 
 %% Reception
 
-bitstream_rx = rx(tx_rf_augmented, conf);
+bitstream_rx = rx(rxsignal, conf);
 bitstream_rx = logical(bitstream_rx);
 
 ber = sum(bitstream(:) ~= bitstream_rx(:)) / length(bitstream(:))
