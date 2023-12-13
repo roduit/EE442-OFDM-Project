@@ -1,3 +1,27 @@
+% image2bitstream - Convert an image matrix to a binary bitstream
+%
+% Syntax: [bitstream] = image2bitstream(conf, image)
+%
+% Inputs:
+%    conf - Configuration parameters for the conversion
+%    image - Input image matrix
+%
+% Outputs:
+%    bitstream - Binary bitstream representing the image
+%
+% Example:
+%    conf.nb_frames = 16;
+%    image = imread('image.jpg');
+%    bitstream = image2bitstream(conf, image);
+%
+% Other Requirements:
+%    This function requires the Image Processing Toolbox.
+%
+% See also: reshape, de2bi
+% Author(s): [Vincent Roduit, Filippo Quadri]
+% Date: [2023-12-05]
+% Version: [1.0]
+
 function [bitstream] = image2bitstream(conf, image)
     % Reshape the image matrix to a column vector
     image_vector = reshape(image, [], 1);

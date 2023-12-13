@@ -1,3 +1,24 @@
+% rx(rx_signal, conf) performs the receiver processing for a wireless communication system.
+% 
+% Inputs:
+%   - rx_signal: received signal
+%   - conf: configuration struct containing the following fields:
+%       - symb_per_packet: number of symbols per packet
+%       - os_factor_ofdm: oversampling factor for OFDM
+%       - cp_length: length of cyclic prefix
+%       - sampling_freq: sampling frequency
+%       - carrier_freq: carrier frequency
+%       - os_factor_preamb: oversampling factor for preamble
+%       - matched_filter_length_rx: length of matched filter for receiver
+%       - nb_frames: number of frames
+%       - bits_per_packet: number of bits per packet
+%       - nb_packets: number of packets
+%
+% Output:
+%   - rx_bitstream: received bitstream
+% Author(s): [Vincent Roduit, Filippo Quadri]
+% Date: [2023-12-05]
+% Version: [2.5]
 function [rx_bitstream] = rx(rx_signal, conf)
     % rx_signal: received signal
     % conf: configuration struct

@@ -1,6 +1,47 @@
+% tx - Transmits the given bitstream using the specified configuration parameters.
+%
+% Syntax:
+%   [txsignal_rf] = tx(tx_bitstream, conf)
+%
+% Inputs:
+%   - tx_bitstream: Bitstream to be transmitted.
+%   - conf: Structure containing configuration parameters.
+%
+% Outputs:
+%   - txsignal_rf: RF signal to be transmitted.
+%
+% Description:
+%   This function generates the RF signal to be transmitted based on the given bitstream and configuration parameters.
+%   It performs the following steps:
+%   1. Generates the preamble and converts it to BPSK.
+%   2. Upsamples the preamble and applies pulse shaping.
+%   3. Generates the training sequence and converts it to BPSK.
+%   4. Converts the bitstream to QPSK.
+%   5. Concatenates the training sequence and bitstream.
+%   6. Performs serial to parallel conversion.
+%   7. Applies IFFT, cyclic prefix, and parallel to serial conversion to each frame.
+%   8. Performs up conversion to RF frequency.
+%   9. Normalizes the signal and calculates the RMS value.
+%   10. Normalizes the signal by dividing it by the RMS value.
+%
+% Example:
+%   conf.preamble_length = 64;
+%   conf.os_factor_preamb = 4;
+%   conf.symb_per_packet = 10;
+%   conf.os_factor_ofdm = 8;
+%   conf.cp_length = 16;
+%   conf.nb_frames = 5;
+%   conf.nb_packets = 4;
+%   conf.frame_gap = 100;
+%   conf.sampling_freq = 1e6;
+%   conf.carrier_freq = 2e6;
+%   tx_bitstream = randi([0, 1], conf.symb_per_packet * conf.nb_packets, conf.nb_frames);
+%   txsignal_rf = tx(tx_bitstream, conf);
+%
+% See also: preamble_gen, bit2bpsk, upsample, matched_filter, bit2qpsk, series2parallel,
+%           osifft, cyclic_prefix, parallel2series
+
 function [txsignal_rf] = tx(tx_bitstream, conf)
-% tx_bitstream: bitstream to be transmitted
-% tx_signal: signal to be transmitted
     row_dimension = conf.preamble_length * conf.os_factor_preamb + (conf.symb_per_packet * conf.os_factor_ofdm + conf.cp_length) * (conf.packet_per_frame + 1) + conf.frame_gap;
     tot_signal = zeros(row_dimension,conf.nb_frames);
     % Generate preamble

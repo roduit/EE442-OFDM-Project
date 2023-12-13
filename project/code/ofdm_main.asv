@@ -1,9 +1,3 @@
-% -*- file name: ofdm_main -*-
-% -*- author(s) : Vincent Roduit, Filippo Quadri -*-
-% -*- date : 2023-12-02 -*-
-% -*- Last revision: 2023-12-13 (Vincent Roduit)-*-
-% -*- Description: Main code that produces OFDM module -*-
-
 clear;
 clc
 %% Upload image
@@ -49,12 +43,12 @@ end
 % Match filter properties
 conf.rolloff_factor = 0.22;                                 % Roll-off factor (RRC)
 
-conf.matched_filter_length_tx = conf.os_factor_preamb * 18; % Transmitter filter length
+conf.matched_filter_length_tx = conf.os_factor_preamb * 18; % Transmitte filter length
 conf.matched_filter_length_rx = conf.os_factor_preamb * 6;  % Receiver filter length
 
 
 
-%% Transmission
+
 % Transmit
 bitstream = image2bitstream(conf, gray_lena);
 %bitstream = randi([0, 1], conf.bits_per_packet * conf.nb_packets, conf.nb_frames);
@@ -62,17 +56,12 @@ bitstream = image2bitstream(conf, gray_lena);
 % RF data generation
 tx_rf = tx(bitstream, conf);
 
-% pad signal with zeros to simulate delay
 tx_rf_augmented = [ zeros(conf.sampling_freq,1) ; tx_rf ;  zeros(conf.sampling_freq,1) ];
-
-%% Reception
 
 bitstream_rx = rx(tx_rf_augmented, conf);
 bitstream_rx = logical(bitstream_rx);
 
 ber = sum(bitstream(:) ~= bitstream_rx(:)) / length(bitstream(:))
-
-%% Plot results
 
 output_image = bitstream2image(bitstream_rx(:),conf.original_image);
 
