@@ -27,22 +27,22 @@
 % Example:
 %   conf.preamble_length = 64;
 %   conf.os_factor_preamb = 4;
-%   conf.symb_per_packet = 10;
+%   conf.nb_carriers = 10;
 %   conf.os_factor_ofdm = 8;
 %   conf.cp_length = 16;
 %   conf.nb_frames = 5;
-%   conf.nb_packets = 4;
+%   conf.ofdm_sym_per_frame = 4;
 %   conf.frame_gap = 100;
 %   conf.sampling_freq = 1e6;
 %   conf.carrier_freq = 2e6;
-%   tx_bitstream = randi([0, 1], conf.symb_per_packet * conf.nb_packets, conf.nb_frames);
+%   tx_bitstream = randi([0, 1], conf.nb_carriers * conf.ofdm_sym_per_frame, conf.nb_frames);
 %   txsignal_rf = tx(tx_bitstream, conf);
 %
 % See also: preamble_gen, bit2bpsk, upsample, matched_filter, bit2qpsk, series2parallel,
 %           osifft, cyclic_prefix, parallel2series
 
 function [txsignal_rf] = tx(tx_bitstream, conf)
-    row_dimension = conf.preamble_length * conf.os_factor_preamb + (conf.symb_per_packet * conf.os_factor_ofdm + conf.cp_length) * (conf.packet_per_frame + 1) + conf.frame_gap;
+    row_dimension = conf.preamble_length * conf.os_factor_preamb + (conf.nb_carriers * conf.os_factor_ofdm + conf.cp_length) * (conf.ofdm_sym_per_frame + 1) + conf.frame_gap;
     tot_signal = zeros(row_dimension,conf.nb_frames);
     % Generate preamble
     for ii=1:conf.nb_frames
@@ -63,7 +63,7 @@ function [txsignal_rf] = tx(tx_bitstream, conf)
         preamble_shaped = preamble_shaped / rms(preamble_shaped);
       
         % Generate training sequence
-        training_seq = preamble_gen(conf.symb_per_packet);
+        training_seq = preamble_gen(conf.nb_carriers);
     
         % Convert training sequence to BPSK
         training_seq_bpsk = bit2bpsk(training_seq);
@@ -76,11 +76,11 @@ function [txsignal_rf] = tx(tx_bitstream, conf)
         tx_qpsk = vertcat(training_seq_bpsk, bitstream_qpsk);
 
         % Serial to parallel conversion
-        tx_parallel_qpsk = series2parallel(tx_qpsk, conf.symb_per_packet);
+        tx_parallel_qpsk = series2parallel(tx_qpsk, conf.nb_carriers);
 
         % Concatenate the series signals
-        tx_signal = zeros(conf.cp_length + conf.symb_per_packet * conf.os_factor_ofdm, conf.nb_packets + 1);
-        for jj=1:conf.nb_packets+1
+        tx_signal = zeros(conf.cp_length + conf.nb_carriers * conf.os_factor_ofdm, conf.ofdm_sym_per_frame + 1);
+        for jj=1:conf.ofdm_sym_per_frame+1
             frame = tx_parallel_qpsk(:,jj);
             frame_ifft = osifft(frame, conf.os_factor_ofdm);
             frame_cp = cyclic_prefix(frame_ifft, conf.cp_length);

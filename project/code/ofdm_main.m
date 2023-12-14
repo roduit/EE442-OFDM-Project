@@ -33,27 +33,26 @@ conf.original_image = size(gray_image);
 % Frame characteristics 
 conf.preamble_length = 100;
 conf.nb_frames = 64;                                % Number of frames to send image
-conf.nb_packets = 16;                              % Number of OFDM symbols per frame 
+conf.ofdm_sym_per_frame = 16;                              % Number of OFDM symbols per frame 
 conf.frame_gap = 1000;                             % Paddding between two frames
-conf.packet_per_frame = conf.nb_packets;            % Number of packets per frame
-conf.symb_per_packet = 256;                         % Number of symbols per packet (or carriers)
-conf.bits_per_packet = conf.symb_per_packet * 2;    % Number of bits per paccket
-conf.cp_length = conf.symb_per_packet / 2;          % [samples]
+conf.nb_carriers = 256;                         % Number of symbols per packet (or carriers)
+conf.bits_per_ofdm_sym = conf.nb_carriers * 2;    % Number of bits per paccket
+conf.cp_length = conf.nb_carriers / 2;          % [samples]
 
 % Frequencies characteristics
 conf.carrier_freq = 8e3;                            % [Hz] : Carrier frequency
 conf.spacing_freq = 20;                              % [Hz] : Spacing frequency
 conf.sampling_freq = 48e3;                          % [Hz] : Sampling frequency
 
-conf.BW = conf.spacing_freq * conf.symb_per_packet; % [Hz] : Bandwidth 
+conf.BW = conf.spacing_freq * conf.nb_carriers; % [Hz] : Bandwidth 
 
 %conf.symbol_rate_ofdm = 1/conf.BW;                  % [s] : symbol rate OFDM
 conf.symbol_rate_preamb = 1000;                     % [Hz] : symbol rate preamble
 
-%conf.ofdm_symbol_period = conf.symb_per_packet * conf.symbol_rate_ofdm; % [s]: OFDM symbol period
+%conf.ofdm_symbol_period = conf.nb_carriers * conf.symbol_rate_ofdm; % [s]: OFDM symbol period
 
 % Over-sampling factors
-conf.os_factor_ofdm = conf.sampling_freq / (conf.spacing_freq * conf.symb_per_packet); % Oversampling factor OFDM
+conf.os_factor_ofdm = conf.sampling_freq / (conf.spacing_freq * conf.nb_carriers); % Oversampling factor OFDM
 conf.os_factor_preamb = conf.sampling_freq / conf.symbol_rate_preamb;                  % Oversampling factor preamble
 
 if mod(conf.os_factor_preamb,1) ~= 0
@@ -71,7 +70,7 @@ conf.matched_filter_length_rx = conf.os_factor_preamb * 6;  % Receiver filter le
 %% Transmission
 % Transmit
 bitstream = image2bitstream(conf, gray_image);
-%bitstream = randi([0, 1], conf.bits_per_packet * conf.nb_packets, conf.nb_frames);
+%bitstream = randi([0, 1], conf.bits_per_ofdm_sym * conf.ofdm_sym_per_frame, conf.nb_frames);
 
 % RF data generation
 tx_rf = tx(bitstream, conf);

@@ -23,10 +23,10 @@ function [rx_bitstream] = rx(rx_signal, conf)
     % rx_signal: received signal
     % conf: configuration struct
 
-    training_seq = preamble_gen(conf.symb_per_packet);
+    training_seq = preamble_gen(conf.nb_carriers);
     training_seq = bit2bpsk(training_seq);
 
-    os_training_length = conf.symb_per_packet * conf.os_factor_ofdm + conf.cp_length;
+    os_training_length = conf.nb_carriers * conf.os_factor_ofdm + conf.cp_length;
 
     % Down-conversion
     time = 0:1/conf.sampling_freq:(length(rx_signal)/conf.sampling_freq)-1/conf.sampling_freq;
@@ -39,7 +39,7 @@ function [rx_bitstream] = rx(rx_signal, conf)
     
     start_index = 1;
 
-    rx_bitstream = zeros(conf.bits_per_packet * conf.nb_packets, conf.nb_frames);
+    rx_bitstream = zeros(conf.bits_per_ofdm_sym * conf.ofdm_sym_per_frame, conf.nb_frames);
 
     for ii=1:conf.nb_frames
         rx_slice_MF = rx_signal_MF(start_index:end);
@@ -47,14 +47,14 @@ function [rx_bitstream] = rx(rx_signal, conf)
 
         beginning_of_data = frame_sync(rx_slice_MF, conf);
 
-        rx_slice_MF = rx_slice(beginning_of_data : beginning_of_data + os_training_length + conf.packet_per_frame * (conf.symb_per_packet * conf.os_factor_ofdm + conf.cp_length) - 1);
+        rx_slice_MF = rx_slice(beginning_of_data : beginning_of_data + os_training_length + conf.ofdm_sym_per_frame * (conf.nb_carriers * conf.os_factor_ofdm + conf.cp_length) - 1);
 
-        rx_symbols = zeros(conf.symb_per_packet,conf.packet_per_frame + 1);
+        rx_symbols = zeros(conf.nb_carriers,conf.ofdm_sym_per_frame + 1);
 
-        rx_signal_ofdm = series2parallel(rx_slice_MF, conf.symb_per_packet * conf.os_factor_ofdm + conf.cp_length);
+        rx_signal_ofdm = series2parallel(rx_slice_MF, conf.nb_carriers * conf.os_factor_ofdm + conf.cp_length);
         rx_signal_ofdm = rx_signal_ofdm(1 + conf.cp_length:end, :);
 
-        for jj = 1:conf.packet_per_frame + 1
+        for jj = 1:conf.ofdm_sym_per_frame + 1
             rx_fft = osfft(rx_signal_ofdm(:, jj), conf.os_factor_ofdm);
             rx_symbols(:, jj) = rx_fft;
     
@@ -72,7 +72,7 @@ function [rx_bitstream] = rx(rx_signal, conf)
         channel_phase_est(:, 1) = mod(angle(channel), 2*pi);
         channel_mag_est = abs(channel);
     
-        for k = 1:conf.nb_packets
+        for k = 1:conf.ofdm_sym_per_frame
             deltaTheta = 1/4 * angle(-rx_data(:, k).^4) + pi/2 * (-1:4);
          
             [~, ind] = min(abs(deltaTheta - channel_phase_est(:, k)), [], 2);
@@ -87,7 +87,7 @@ function [rx_bitstream] = rx(rx_signal, conf)
         rx_data = (rx_data ./ channel_mag_est) .* exp(-1j .* channel_phase_est(:, 2:end));
         rx_bitstream(:,ii) = qpsk2bit(rx_data(:));
 
-        start_index = start_index + beginning_of_data + (conf.symb_per_packet * conf.os_factor_ofdm + conf.cp_length) * (conf.packet_per_frame + 1);
+        start_index = start_index + beginning_of_data + (conf.nb_carriers * conf.os_factor_ofdm + conf.cp_length) * (conf.ofdm_sym_per_frame + 1);
     end
 end
     
