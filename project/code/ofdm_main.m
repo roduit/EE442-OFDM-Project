@@ -15,7 +15,7 @@ rng(123);
 lena_image = imread('lena.png');
 gray_lena = rgb2gray(lena_image);
 
-%% *-* Config parameters *-*
+%% Config parameters
 
 % Audio transmission characteristics
 %   3 operating modes:
@@ -32,8 +32,8 @@ conf.original_image = size(gray_lena);
 
 % Frame characteristics 
 conf.preamble_length = 100;
-conf.nb_frames = 16;                                % Number of frames to send image
-conf.nb_packets = 256;                              % Number of OFDM symbols per frame 
+conf.nb_frames = 1;                                % Number of frames to send image
+conf.nb_packets = 10;                              % Number of OFDM symbols per frame 
 conf.frame_gap = 10000;                             % Paddding between two frames
 conf.packet_per_frame = conf.nb_packets;            % Number of packets per frame
 conf.symb_per_packet = 256;                         % Number of symbols per packet (or carriers)
@@ -47,10 +47,10 @@ conf.sampling_freq = 48e3;                          % [Hz] : Sampling frequency
 
 conf.BW = conf.spacing_freq * conf.symb_per_packet; % [Hz] : Bandwidth 
 
-conf.symbol_rate_ofdm = 1/conf.BW;                  % [s] : symbol rate OFDM
+%conf.symbol_rate_ofdm = 1/conf.BW;                  % [s] : symbol rate OFDM
 conf.symbol_rate_preamb = 1000;                     % [Hz] : symbol rate preamble
 
-conf.ofdm_symbol_period = conf.symb_per_packet * conf.symbol_rate_ofdm; % [s]: OFDM symbol periode
+%conf.ofdm_symbol_period = conf.symb_per_packet * conf.symbol_rate_ofdm; % [s]: OFDM symbol period
 
 % Over-sampling factors
 conf.os_factor_ofdm = conf.sampling_freq / (conf.spacing_freq * conf.symb_per_packet); % Oversampling factor OFDM
@@ -70,8 +70,8 @@ conf.matched_filter_length_rx = conf.os_factor_preamb * 6;  % Receiver filter le
 
 %% Transmission
 % Transmit
-bitstream = image2bitstream(conf, gray_lena);
-%bitstream = randi([0, 1], conf.bits_per_packet * conf.nb_packets, conf.nb_frames);
+%bitstream = image2bitstream(conf, gray_lena);
+bitstream = randi([0, 1], conf.bits_per_packet * conf.nb_packets, conf.nb_frames);
 
 % RF data generation
 tx_rf = tx(bitstream, conf);
@@ -135,19 +135,19 @@ ber = sum(bitstream(:) ~= bitstream_rx(:)) / length(bitstream(:))
 
 %% Plot results
 
-output_image = bitstream2image(bitstream_rx(:),conf.original_image);
+%output_image = bitstream2image(bitstream_rx(:),conf.original_image);
 
-% figure;
-% plot(tx_rf)
-% title('Transmitted RF Data');
-% xlabel('Sample Index');
-% ylabel('Amplitude');
-% 
-% figure;
-% plot(tx_rf_augmented)
-% title('Transmitted RF Data with padding');
-% xlabel('Sample Index');
-% ylabel('Amplitude');
+figure;
+plot(tx_rf)
+title('Transmitted RF Data');
+xlabel('Sample Index');
+ylabel('Amplitude');
+
+figure;
+plot(rxsignal)
+title('Transmitted RF Data with padding');
+xlabel('Sample Index');
+ylabel('Amplitude');
 
 
 %{

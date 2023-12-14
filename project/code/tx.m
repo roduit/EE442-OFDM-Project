@@ -104,10 +104,10 @@ function [txsignal_rf] = tx(tx_bitstream, conf)
     txsignal = real(tx_signal) .* cos(2*pi*conf.carrier_freq*time)' - imag(tx_signal) .* sin(2*pi*conf.carrier_freq*time)';
     
     % Calculate the RMS value
-    rms_value = rms(txsignal);
+    max_value = max(abs(txsignal));
 
     % Normalize the signal
-    txsignal_rf = txsignal / rms_value;
+    txsignal_rf = txsignal / max_value;
     %txsignal_rf = tx_signal_down;
 
 end
