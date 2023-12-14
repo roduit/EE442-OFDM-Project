@@ -12,8 +12,8 @@ clc
 %% Upload image
 
 rng(123);
-lena_image = imread('lena.png');
-gray_lena = rgb2gray(lena_image);
+image = imread('epfl_256.png');
+gray_image = im2gray(image);
 
 %% Config parameters
 
@@ -28,13 +28,13 @@ conf.audiosystem = 'matlab'; % Values: 'matlab','native','bypass'
 conf.bitsps     = 16;
 
 % Image characteristics
-conf.original_image = size(gray_lena);
+conf.original_image = size(gray_image);
 
 % Frame characteristics 
 conf.preamble_length = 100;
-conf.nb_frames = 1;                                % Number of frames to send image
-conf.nb_packets = 10;                              % Number of OFDM symbols per frame 
-conf.frame_gap = 10000;                             % Paddding between two frames
+conf.nb_frames = 64;                                % Number of frames to send image
+conf.nb_packets = 16;                              % Number of OFDM symbols per frame 
+conf.frame_gap = 1000;                             % Paddding between two frames
 conf.packet_per_frame = conf.nb_packets;            % Number of packets per frame
 conf.symb_per_packet = 256;                         % Number of symbols per packet (or carriers)
 conf.bits_per_packet = conf.symb_per_packet * 2;    % Number of bits per paccket
@@ -42,7 +42,7 @@ conf.cp_length = conf.symb_per_packet / 2;          % [samples]
 
 % Frequencies characteristics
 conf.carrier_freq = 8e3;                            % [Hz] : Carrier frequency
-conf.spacing_freq = 5;                              % [Hz] : Spacing frequency
+conf.spacing_freq = 20;                              % [Hz] : Spacing frequency
 conf.sampling_freq = 48e3;                          % [Hz] : Sampling frequency
 
 conf.BW = conf.spacing_freq * conf.symb_per_packet; % [Hz] : Bandwidth 
@@ -70,8 +70,8 @@ conf.matched_filter_length_rx = conf.os_factor_preamb * 6;  % Receiver filter le
 
 %% Transmission
 % Transmit
-%bitstream = image2bitstream(conf, gray_lena);
-bitstream = randi([0, 1], conf.bits_per_packet * conf.nb_packets, conf.nb_frames);
+bitstream = image2bitstream(conf, gray_image);
+%bitstream = randi([0, 1], conf.bits_per_packet * conf.nb_packets, conf.nb_frames);
 
 % RF data generation
 tx_rf = tx(bitstream, conf);
@@ -135,7 +135,7 @@ ber = sum(bitstream(:) ~= bitstream_rx(:)) / length(bitstream(:))
 
 %% Plot results
 
-%output_image = bitstream2image(bitstream_rx(:),conf.original_image);
+output_image = bitstream2image(bitstream_rx(:),conf.original_image);
 
 figure;
 plot(tx_rf)
@@ -145,7 +145,7 @@ ylabel('Amplitude');
 
 figure;
 plot(rxsignal)
-title('Transmitted RF Data with padding');
+title('Received RF Data with padding');
 xlabel('Sample Index');
 ylabel('Amplitude');
 
