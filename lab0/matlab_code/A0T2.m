@@ -1,3 +1,4 @@
+addpath("functions/")
 
-x = 1;
-y = my_function(x);
+x = 2;
+y = my_function(x)
