@@ -1,3 +1,19 @@
+function [after] = ofdmlowpass(before,conf,f)
+    % LOWPASS lowpass filter
+    % Low pass filter for extracting the baseband signal 
+    %
+    %   before  : Unfiltered signal
+    %   conf    : Global configuration variable
+    %   f       : Corner Frequency
+    %
+    %   after   : Filtered signal
+    %
+    % Note: This filter is very simple but should be decent for most 
+    % application. For very high symbol rates and/or low carrier frequencies
+    % it might need tweaking.
+    %
+    after = lowpass(before,f,conf.sampling_freq,StopbandAttenuation=30);
+
 
 %  function [after] = ofdmlowpass(before,conf,f)
 % % LOWPASS lowpass filter
@@ -18,20 +34,3 @@
 % B=h_lp.ScaleValues(1);
 % A=[1,h_lp.sosMatrix(5)];
 % after =filter(B,A,before);
- 
-
-function [after] = ofdmlowpass(before,conf,f)
-    % LOWPASS lowpass filter
-    % Low pass filter for extracting the baseband signal 
-    %
-    %   before  : Unfiltered signal
-    %   conf    : Global configuration variable
-    %   f       : Corner Frequency
-    %
-    %   after   : Filtered signal
-    %
-    % Note: This filter is very simple but should be decent for most 
-    % application. For very high symbol rates and/or low carrier frequencies
-    % it might need tweaking.
-    %
-    after = lowpass(before,f,conf.sampling_freq,StopbandAttenuation=30);

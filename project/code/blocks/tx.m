@@ -1,49 +1,54 @@
-% tx - Transmits the given bitstream using the specified configuration parameters.
-%
-% Syntax:
-%   [txsignal_rf] = tx(tx_bitstream, conf)
-%
-% Inputs:
-%   - tx_bitstream: Bitstream to be transmitted.
-%   - conf: Structure containing configuration parameters.
-%
-% Outputs:
-%   - txsignal_rf: RF signal to be transmitted.
-%
-% Description:
-%   This function generates the RF signal to be transmitted based on the given bitstream and configuration parameters.
-%   It performs the following steps:
-%   1. Generates the preamble and converts it to BPSK.
-%   2. Upsamples the preamble and applies pulse shaping.
-%   3. Generates the training sequence and converts it to BPSK.
-%   4. Converts the bitstream to QPSK.
-%   5. Concatenates the training sequence and bitstream.
-%   6. Performs serial to parallel conversion.
-%   7. Applies IFFT, cyclic prefix, and parallel to serial conversion to each frame.
-%   8. Performs up conversion to RF frequency.
-%   9. Normalizes the signal and calculates the RMS value.
-%   10. Normalizes the signal by dividing it by the RMS value.
-%
-% Example:
-%   conf.preamble_length = 64;
-%   conf.os_factor_preamb = 4;
-%   conf.nb_carriers = 10;
-%   conf.os_factor_ofdm = 8;
-%   conf.cp_length = 16;
-%   conf.nb_frames = 5;
-%   conf.ofdm_sym_per_frame = 4;
-%   conf.frame_gap = 100;
-%   conf.sampling_freq = 1e6;
-%   conf.carrier_freq = 2e6;
-%   tx_bitstream = randi([0, 1], conf.nb_carriers * conf.ofdm_sym_per_frame, conf.nb_frames);
-%   txsignal_rf = tx(tx_bitstream, conf);
-%
-% See also: preamble_gen, bit2bpsk, upsample, matched_filter, bit2qpsk, series2parallel,
-%           osifft, cyclic_prefix, parallel2series
-
 function [txsignal_rf] = tx(tx_bitstream, conf)
+    % tx - Transmits the given bitstream using the specified configuration parameters.
+    %
+    % Syntax:
+    %   [txsignal_rf] = tx(tx_bitstream, conf)
+    %
+    % Inputs:
+    %   - tx_bitstream: Bitstream to be transmitted.
+    %   - conf: Structure containing configuration parameters.
+    %
+    % Outputs:
+    %   - txsignal_rf: RF signal to be transmitted.
+    %
+    % Description:
+    %   This function generates the RF signal to be transmitted based on the given bitstream and configuration parameters.
+    %   It performs the following steps:
+    %   1. Generates the preamble and converts it to BPSK.
+    %   2. Upsamples the preamble and applies pulse shaping.
+    %   3. Generates the training sequence and converts it to BPSK.
+    %   4. Converts the bitstream to QPSK.
+    %   5. Concatenates the training sequence and bitstream.
+    %   6. Performs serial to parallel conversion.
+    %   7. Applies IFFT, cyclic prefix, and parallel to serial conversion to each frame.
+    %   8. Performs up conversion to RF frequency.
+    %   9. Normalizes the signal and calculates the RMS value.
+    %   10. Normalizes the signal by dividing it by the RMS value.
+    %
+    % Example:
+    %   conf.preamble_length = 64;
+    %   conf.os_factor_preamb = 4;
+    %   conf.nb_carriers = 10;
+    %   conf.os_factor_ofdm = 8;
+    %   conf.cp_length = 16;
+    %   conf.nb_frames = 5;
+    %   conf.ofdm_sym_per_frame = 4;
+    %   conf.frame_gap = 100;
+    %   conf.sampling_freq = 1e6;
+    %   conf.carrier_freq = 2e6;
+    %   tx_bitstream = randi([0, 1], conf.nb_carriers * conf.ofdm_sym_per_frame, conf.nb_frames);
+    %   txsignal_rf = tx(tx_bitstream, conf);
+    %
+    % See also: preamble_gen, bit2bpsk, upsample, matched_filter, bit2qpsk, series2parallel,
+    %           osifft, cyclic_prefix, parallel2series
+    %
+    % Author(s):    [Vincent Roduit, Filippo Quadri]
+    % Date:         [2023-12-05]
+    % Version:      [2.6]
+
     row_dimension = conf.preamble_length * conf.os_factor_preamb + (conf.nb_carriers * conf.os_factor_ofdm + conf.cp_length) * (conf.ofdm_sym_per_frame + 1) + conf.frame_gap;
     tot_signal = zeros(row_dimension,conf.nb_frames);
+    
     % Generate preamble
     for ii=1:conf.nb_frames
         preamble = preamble_gen(conf.preamble_length);
@@ -56,8 +61,6 @@ function [txsignal_rf] = tx(tx_bitstream, conf)
     
         % Pulse shape for preamble
         preamble_shaped = matched_filter(preamble_up, conf.os_factor_preamb, conf.matched_filter_length_tx, conf);
-    
-        %preamble_shaped = preamble_shaped(1 + conf.matched_filter_length_tx : end - conf.matched_filter_length_tx);
         
         %Normalize the preamble
         preamble_shaped = preamble_shaped / rms(preamble_shaped);
@@ -88,9 +91,8 @@ function [txsignal_rf] = tx(tx_bitstream, conf)
         end
 
         % Parallel to serial conversion
-        
-        %tx_serial_qpsk = parallel2series(tx_signal);
         tx_serial_qpsk = tx_signal(:);
+        
         % Normalize the signal
         tx_serial_qpsk = tx_serial_qpsk / rms(tx_serial_qpsk);
     
@@ -106,8 +108,7 @@ function [txsignal_rf] = tx(tx_bitstream, conf)
     % Calculate the RMS value
     max_value = max(abs(txsignal));
 
-    % Normalize the signal
+    % Normalize the signal (between -1 and +1 to avoid clipping in the .wav)
     txsignal_rf = txsignal / max_value;
-    %txsignal_rf = tx_signal_down;
 
 end
