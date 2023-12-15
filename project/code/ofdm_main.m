@@ -10,6 +10,9 @@
 clear;
 clc
 %close all;
+addpath("blocks/")
+addpath("functions/")
+addpath("images/")
 %% Upload image
 
 rng(123);
