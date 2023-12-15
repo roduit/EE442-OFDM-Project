@@ -24,7 +24,7 @@ gray_image = im2gray(image);
 %       - ALSA audio tools, most Linux distrubtions
 %       - builtin WAV tools on Windows 
 %   - 'bypass' : no audio transmission, takes txsignal as received signal
-conf.audiosystem = 'matlab  '; % Values: 'matlab','native','bypass'
+conf.audiosystem = 'matlab'; % Values: 'matlab','native','bypass'
 conf.bitsps     = 16;
 
 % Image characteristics
