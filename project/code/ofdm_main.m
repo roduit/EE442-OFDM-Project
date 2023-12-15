@@ -9,6 +9,7 @@
 
 clear;
 clc
+%close all;
 %% Upload image
 
 rng(123);
@@ -24,7 +25,7 @@ gray_image = im2gray(image);
 %       - ALSA audio tools, most Linux distrubtions
 %       - builtin WAV tools on Windows 
 %   - 'bypass' : no audio transmission, takes txsignal as received signal
-conf.audiosystem = 'matlab'; % Values: 'matlab','native','bypass'
+conf.audiosystem = 'bypass'; % Values: 'matlab','native','bypass'
 conf.bitsps     = 16;
 
 % Image characteristics
@@ -34,11 +35,10 @@ conf.original_image = size(gray_image);
 conf.preamble_length = 100;
 conf.nb_frames = 1;                                    % Number of frames to send image
 %conf.ofdm_sym_per_frame = 1024 / conf.nb_frames;         % Number of OFDM symbols per frame 
-conf.ofdm_sym_per_frame = 3;         % Number of OFDM symbols per frame 
+conf.ofdm_sym_per_frame = 10;         % Number of OFDM symbols per frame 
 conf.frame_gap = 1000;                                  % Paddding between two frames
-conf.nb_carriers = 512;                                 % Number of symbols per packet (or carriers)
+conf.nb_carriers = 256;                                 % Number of symbols per packet (or carriers)
 conf.bits_per_ofdm_sym = conf.nb_carriers * 2;          % Number of bits per paccket
-conf.cp_length = conf.nb_carriers / 2;                  % [samples]
 
 % Frequencies characteristics
 conf.carrier_freq = 8e3;                            % [Hz] : Carrier frequency
@@ -55,6 +55,8 @@ conf.symbol_rate_preamb = 1000;                     % [Hz] : symbol rate preambl
 % Over-sampling factors
 conf.os_factor_ofdm = conf.sampling_freq / (conf.spacing_freq * conf.nb_carriers); % Oversampling factor OFDM
 conf.os_factor_preamb = conf.sampling_freq / conf.symbol_rate_preamb;                  % Oversampling factor preamble
+
+conf.cp_length = conf.nb_carriers / 2 * conf.os_factor_ofdm;                  % [samples]
 
 if mod(conf.os_factor_preamb,1) ~= 0
     disp('WARNING PREAMB: Sampling rate must be a multiple of the symbol rate'); 
@@ -79,9 +81,10 @@ tx_rf = tx(bitstream, conf);
 
 % pad signal with zeros to simulate delay
 rawtxsignal = [ zeros(conf.sampling_freq,1) ; tx_rf ;  zeros(conf.sampling_freq,1) ];
+%rawtxsignal = tx_rf;
 
 txdur = length(rawtxsignal)/conf.sampling_freq; % calculate length of transmitted signal
-audiowrite('out.wav',rawtxsignal,conf.sampling_freq)
+audiowrite('out.wav', rawtxsignal, conf.sampling_freq)
 
 % Platform native audio mode 
 if strcmp(conf.audiosystem,'native')
@@ -129,6 +132,12 @@ end
 
 %% Reception
 
+fading_channel = fading_channel_sim();
+%figure;
+%stem(fading_channel);
+
+rxsignal = conv(rxsignal, fading_channel, "same");
+
 bitstream_rx = rx(rxsignal, conf);
 bitstream_rx = logical(bitstream_rx);
 
@@ -138,12 +147,12 @@ ber = sum(bitstream(:) ~= bitstream_rx(:)) / length(bitstream(:))
 
 % Plot FFT of transmitted signal
 figure;
-y = fft(tx_rf);
-z = fftshift(y);
+y_tx = fft(tx_rf);
+z_tx = fftshift(y_tx);
 
-ly = length(y);
+ly = length(y_tx);
 f = (-ly/2:ly/2-1)/ly*conf.sampling_freq;
-plot(f,abs(z),"LineWidth",2)
+plot(f,abs(z_tx),"LineWidth",2)
 xline(conf.carrier_freq)
 xline(-conf.carrier_freq)
 title("FFT of the TX signal")
@@ -151,12 +160,12 @@ xlabel("Frequency (Hz)")
 ylabel("|fft(tx\_rf)|")
 
 figure;
-y = fft(rxsignal);
-z = fftshift(y);
-ly = length(y);
+y_rx = fft(rxsignal);
+z_rx = fftshift(y_rx);
+ly = length(y_rx);
 f = (-ly/2:ly/2-1)/ly*conf.sampling_freq;
 
-plot(f,abs(z),"LineWidth",2)
+plot(f,abs(z_rx),"LineWidth",2)
 xline(conf.carrier_freq)
 xline(-conf.carrier_freq)
 title("FFT of the RX signal")
