@@ -12,7 +12,7 @@ clc
 %% Upload image
 
 rng(123);
-image = imread('epfl_256.png');
+image = imread('lena_256.png');
 gray_image = im2gray(image);
 
 %% Config parameters
@@ -24,7 +24,7 @@ gray_image = im2gray(image);
 %       - ALSA audio tools, most Linux distrubtions
 %       - builtin WAV tools on Windows 
 %   - 'bypass' : no audio transmission, takes txsignal as received signal
-conf.audiosystem = 'matlab'; % Values: 'matlab','native','bypass'
+conf.audiosystem = 'matlab  '; % Values: 'matlab','native','bypass'
 conf.bitsps     = 16;
 
 % Image characteristics
@@ -32,16 +32,17 @@ conf.original_image = size(gray_image);
 
 % Frame characteristics 
 conf.preamble_length = 100;
-conf.nb_frames = 64;                                % Number of frames to send image
-conf.ofdm_sym_per_frame = 16;                              % Number of OFDM symbols per frame 
-conf.frame_gap = 1000;                             % Paddding between two frames
-conf.nb_carriers = 256;                         % Number of symbols per packet (or carriers)
-conf.bits_per_ofdm_sym = conf.nb_carriers * 2;    % Number of bits per paccket
-conf.cp_length = conf.nb_carriers / 2;          % [samples]
+conf.nb_frames = 1;                                    % Number of frames to send image
+%conf.ofdm_sym_per_frame = 1024 / conf.nb_frames;         % Number of OFDM symbols per frame 
+conf.ofdm_sym_per_frame = 3;         % Number of OFDM symbols per frame 
+conf.frame_gap = 1000;                                  % Paddding between two frames
+conf.nb_carriers = 512;                                 % Number of symbols per packet (or carriers)
+conf.bits_per_ofdm_sym = conf.nb_carriers * 2;          % Number of bits per paccket
+conf.cp_length = conf.nb_carriers / 2;                  % [samples]
 
 % Frequencies characteristics
 conf.carrier_freq = 8e3;                            % [Hz] : Carrier frequency
-conf.spacing_freq = 20;                              % [Hz] : Spacing frequency
+conf.spacing_freq = 5;                              % [Hz] : Spacing frequency
 conf.sampling_freq = 48e3;                          % [Hz] : Sampling frequency
 
 conf.BW = conf.spacing_freq * conf.nb_carriers; % [Hz] : Bandwidth 
@@ -69,8 +70,9 @@ conf.matched_filter_length_rx = conf.os_factor_preamb * 6;  % Receiver filter le
 
 %% Transmission
 % Transmit
-bitstream = image2bitstream(conf, gray_image);
-%bitstream = randi([0, 1], conf.bits_per_ofdm_sym * conf.ofdm_sym_per_frame, conf.nb_frames);
+%bitstream = image2bitstream(conf, gray_image);
+bitstream = randi([0, 1], conf.bits_per_ofdm_sym * conf.ofdm_sym_per_frame, conf.nb_frames);
+%bitstream = ones(conf.bits_per_ofdm_sym * conf.ofdm_sym_per_frame, conf.nb_frames);
 
 % RF data generation
 tx_rf = tx(bitstream, conf);
@@ -134,19 +136,46 @@ ber = sum(bitstream(:) ~= bitstream_rx(:)) / length(bitstream(:))
 
 %% Plot results
 
-output_image = bitstream2image(bitstream_rx(:),conf.original_image);
+% Plot FFT of transmitted signal
+figure;
+y = fft(tx_rf);
+z = fftshift(y);
+
+ly = length(y);
+f = (-ly/2:ly/2-1)/ly*conf.sampling_freq;
+plot(f,abs(z),"LineWidth",2)
+xline(conf.carrier_freq)
+xline(-conf.carrier_freq)
+title("FFT of the TX signal")
+xlabel("Frequency (Hz)")
+ylabel("|fft(tx\_rf)|")
 
 figure;
-plot(tx_rf)
-title('Transmitted RF Data');
-xlabel('Sample Index');
-ylabel('Amplitude');
+y = fft(rxsignal);
+z = fftshift(y);
+ly = length(y);
+f = (-ly/2:ly/2-1)/ly*conf.sampling_freq;
 
-figure;
-plot(rxsignal)
-title('Received RF Data with padding');
-xlabel('Sample Index');
-ylabel('Amplitude');
+plot(f,abs(z),"LineWidth",2)
+xline(conf.carrier_freq)
+xline(-conf.carrier_freq)
+title("FFT of the RX signal")
+xlabel("Frequency (Hz)")
+ylabel("|fft(rx\_rf)|")
+
+%output_image = bitstream2image(bitstream_rx(:),conf.original_image);
+
+% figure;
+% plot(tx_rf)
+% title('Transmitted RF Data');
+% xlabel('Sample Index');
+% ylabel('Amplitude');
+% 
+% figure;
+% plot(rxsignal)
+% title('Received RF Data with padding');
+% xlabel('Sample Index');
+% ylabel('Amplitude');
 
 
 %{

@@ -33,13 +33,17 @@ function [rx_bitstream] = rx(rx_signal, conf)
     r_dc = rx_signal .* exp(-1j*2*pi*conf.carrier_freq*time');
 
     % Low-pass filtering
-    rx_signal = 2 * ofdmlowpass(r_dc,conf,conf.sampling_freq);
+    rx_signal = 2 * ofdmlowpass(r_dc,conf, 1.5*conf.BW);
     % Apply MF
     rx_signal_MF = matched_filter(rx_signal, conf.os_factor_preamb, conf.matched_filter_length_rx, conf);
     
     start_index = 1;
 
     rx_bitstream = zeros(conf.bits_per_ofdm_sym * conf.ofdm_sym_per_frame, conf.nb_frames);
+
+    % Channel over time
+    channel_across_frames = zeros(conf.nb_carriers, conf.nb_frames);
+    channel_across_frames_time = zeros(conf.nb_carriers, conf.nb_frames);
 
     for ii=1:conf.nb_frames
         rx_slice_MF = rx_signal_MF(start_index:end);
@@ -68,6 +72,8 @@ function [rx_bitstream] = rx(rx_signal, conf)
         
         % Estimate the channel
         channel = rx_training_sequence ./ training_seq;
+        channel_across_frames(:, ii) = channel;
+        channel_across_frames_time(:, ii) = ifft(channel);
         channel_phase_est = zeros(size(rx_symbols));
         channel_phase_est(:, 1) = mod(angle(channel), 2*pi);
         channel_mag_est = abs(channel);
@@ -89,6 +95,31 @@ function [rx_bitstream] = rx(rx_signal, conf)
 
         start_index = start_index + beginning_of_data + (conf.nb_carriers * conf.os_factor_ofdm + conf.cp_length) * (conf.ofdm_sym_per_frame + 1);
     end
+    
+    frequencies = conf.carrier_freq - conf.BW / 2 : conf.spacing_freq : conf.carrier_freq + conf.BW / 2 - conf.spacing_freq;
+    figure;
+    plot(frequencies, 20 * log10(abs(channel_across_frames)));
+    xlabel("Frequency [Hz]");
+    ylabel("Magnitude [dB]");
+    title("Channel Magnitude");
+
+    figure;
+    plot(frequencies, unwrap(angle(channel_across_frames)) * 180 / pi);
+    xlabel("Frequency [Hz]")
+    ylabel("Phase [°]");
+    title("Channel Phase");
+
+    figure;
+    plot(20*log10(abs(channel_across_frames_time(:, 1))))
+    xlabel("Time")
+    ylabel("Magnitude");
+    title("Fading Channel");
+
+
+    figure;
+    plot(rx_data, 'o');
+    title("Constellation Points at RX")
+
 end
     
     
