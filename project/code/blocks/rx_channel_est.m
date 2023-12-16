@@ -1,4 +1,4 @@
-function [rx_bitstream, channel_mag_est, channel_phase_est, channel_real] = rx_channel_est(rx_signal, conf)
+function [rx_bitstream, channel_mag_est, channel_phase_est, channel_real, channel_across_frames_time, complete_channel] = rx_channel_est(rx_signal, conf)
     % rx(rx_signal, conf) performs the receiver processing for a wireless communication system.
     % 
     % Inputs:

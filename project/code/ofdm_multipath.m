@@ -39,7 +39,7 @@ conf.original_image = size(gray_image);
 conf.preamble_length = 100;
 conf.nb_frames = 1;                                    % Number of frames to send image
 %conf.ofdm_sym_per_frame = 1024 / conf.nb_frames;         % Number of OFDM symbols per frame 
-conf.ofdm_sym_per_frame = 10;         % Number of OFDM symbols per frame 
+conf.ofdm_sym_per_frame = 15;         % Number of OFDM symbols per frame 
 conf.frame_gap = 1000;                                  % Paddding between two frames
 conf.nb_carriers = 256;                                 % Number of symbols per packet (or carriers)
 conf.bits_per_ofdm_sym = conf.nb_carriers * 2;          % Number of bits per paccket
@@ -151,32 +151,33 @@ bitstream_rx = logical(bitstream_rx);
 ber = sum(bitstream(:) ~= bitstream_rx(:)) / length(bitstream(:))
 
 figure;
-plot(20*log10(abs(channel_across_frames_time(:, 1)) / max(abs(channel_across_frames_time(:, 1)))))
-hold on
-plot(20*log10(abs(channel_across_frames_time_bypass(:, 1)) / max(abs(channel_across_frames_time_bypass(:, 1)))));
+time_ax = 0: conf.os_factor_ofdm / conf.sampling_freq : (conf.nb_carriers - 1) * conf.os_factor_ofdm / conf.sampling_freq;
+plot(time_ax, 20*log10(abs(channel_across_frames_time(:, 1))))
+%hold on
+%plot(20*log10(abs(channel_across_frames_time_bypass(:, 1)) / max(abs(channel_across_frames_time_bypass(:, 1)))));
 xlabel("Time")
 ylabel("Magnitude");
-legend("Measurement", "Simulation")
+%legend("Measurement", "Simulation")
 title("Fading Channel");
 
 % Plot the channel informations
 frequencies = conf.carrier_freq - conf.BW / 2 : conf.spacing_freq : conf.carrier_freq + conf.BW / 2 - conf.spacing_freq;
 figure;
-plot(frequencies, 20 * log10(abs(channel_across_frames) / max(abs(channel_across_frames))));
-hold on
-plot(frequencies, 20 * log10(abs(channel_across_frames_bypass) / max(abs(channel_across_frames_bypass))));
+plot(frequencies, 20 * log10(abs(channel_across_frames)));
+%hold on
+%plot(frequencies, 20 * log10(abs(channel_across_frames_bypass) / max(abs(channel_across_frames_bypass))));
 xlabel("Frequency [Hz]");
 ylabel("Magnitude [dB]");
-legend("Measurement", "Simulation")
+%legend("Measurement", "Simulation")
 title("Channel Magnitude");
 
 figure;
 plot(frequencies, unwrap(angle(channel_across_frames)) * 180 / pi);
-hold on
-plot(frequencies, unwrap(angle(channel_across_frames_bypass)) * 180 / pi);
+%hold on
+%plot(frequencies, unwrap(angle(channel_across_frames_bypass)) * 180 / pi);
 xlabel("Frequency [Hz]")
 ylabel("Phase [°]");
-legend("Measurement", "Simulation")
+%legend("Measurement", "Simulation")
 title("Channel Phase");
 
 %% Plot results

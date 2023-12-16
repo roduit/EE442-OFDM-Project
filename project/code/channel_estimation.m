@@ -149,7 +149,7 @@ rxsignal_sim = conv(rawrxsignal, fading_channel, "same");
 
 %[bitstream_rx_bypass, channel_across_frames_bypass, channel_across_frames_time_bypass] = rx(rxsignal_sim, conf);
 
-[bitstream_rx, channel_mag_est, channel_phase_est, channel_real] = rx_channel_est(rxsignal, conf);
+[bitstream_rx, channel_mag_est, channel_phase_est, channel_real, channel_across_frames_time, complete_channel] = rx_channel_est(rxsignal, conf);
 bitstream_rx = logical(bitstream_rx);
 
 ber = sum(bitstream(:) ~= bitstream_rx(:)) / length(bitstream(:))
@@ -157,6 +157,8 @@ ber = sum(bitstream(:) ~= bitstream_rx(:)) / length(bitstream(:))
 %% Plot results
 
 frequencies = conf.carrier_freq - conf.BW / 2 : conf.spacing_freq : conf.carrier_freq + conf.BW / 2 - conf.spacing_freq;
+channel_across_frames_time_real = ifftshift(ifft(complete_channel));
+
 
 figure;
 plot(20*log10(abs(channel_real)))
@@ -169,14 +171,23 @@ legend("Real Channel", "Training estimated channel")
 
 
 figure;
-plot(unwrap(angle(channel_real)) * 180 / pi);
+plot(mod(unwrap(angle(channel_real)), 2*pi) * 180 / pi);
 hold on;
-plot(unwrap(channel_phase_est(1, 2:end)) * 180 / pi);
+plot(mod(unwrap(channel_phase_est(1, 2:end)), 2*pi) * 180 / pi);
 xlabel("OFDM symbol");
 ylabel("Phase [°]");
 title("Channel Phase");
 legend("Real Channel", "Training estimated channel");
 
+figure;
+time_ax = 0: conf.os_factor_ofdm / conf.sampling_freq : (conf.nb_carriers - 1) * conf.os_factor_ofdm / conf.sampling_freq;
+plot(time_ax, 20*log10(abs(channel_across_frames_time_real(:, 1))))
+hold on
+plot(time_ax, 20*log10(abs(channel_across_frames_time(:, 1))))
+xlabel("Time [s]")
+ylabel("Magnitude [dB]");
+title("Fading Channel");
+legend("Real Channel", "Training estimated channel");
 
 
 
