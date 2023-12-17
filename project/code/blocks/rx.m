@@ -51,6 +51,9 @@ function [rx_bitstream, channel_across_frames, channel_across_frames_time] = rx(
 
         % Frame synchronization
         beginning_of_data = frame_sync(rx_slice_MF, conf);
+        
+        % Add this line to have a little bit of phase shift
+        beginning_of_data = beginning_of_data - 1;
 
         % Extract the frame from received signal
         rx_slice_MF = rx_slice(beginning_of_data : beginning_of_data + os_training_length + conf.ofdm_sym_per_frame * (conf.nb_carriers * conf.os_factor_ofdm + conf.cp_length) - 1);
@@ -64,6 +67,12 @@ function [rx_bitstream, channel_across_frames, channel_across_frames_time] = rx(
             rx_fft = osfft(rx_signal_ofdm(:, jj), conf.os_factor_ofdm);
             rx_symbols(:, jj) = rx_fft;
         end
+        
+        % figure;
+        % plot(rx_symbols, '.');
+        % xlabel("Real Part");
+        % ylabel("Imaginary part");
+        % title("OFDM Symbols before equalization");
         
         % Extract the training sequence
         rx_training_sequence = rx_symbols(:, 1);
@@ -98,8 +107,7 @@ function [rx_bitstream, channel_across_frames, channel_across_frames_time] = rx(
     end
 
 
-%{
-     %figure;
+    figure;
     plot(20*log10(abs(channel_across_frames_time(:, 1))))
     xlabel("Time")
     ylabel("Magnitude");
@@ -123,7 +131,6 @@ function [rx_bitstream, channel_across_frames, channel_across_frames_time] = rx(
     figure;
     plot(rx_data, 'o');
     title("Constellation Points at RX") 
-%}
 
 
 end

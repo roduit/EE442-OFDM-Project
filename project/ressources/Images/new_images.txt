@@ -1,0 +1,21 @@
+In the folder "before_equalization" we can find the received symbols before the equalization process
+
+    Ideal case:
+        here we can see that what we receive is exactly what we sent. We can clearly see the BPSK symbols of the preamble and the QPSK symbols of the data. 
+
+    Time shift:
+        here we are assuming that the frame synchronizer is not perfect and it will not detect the exact sample were the data start (for this graph we assume that the synchronizer synchronize everything 1 sample before the real one). The FFT properties tell us that if we have a shift in the time domain, in the frequency domain we'll have a phase offset. That's exactly what we see.
+
+    Multipath:
+        here we are introducing Multipath (only simulation). To do that we've modelized a channel response and we've convolved the transmitted signal with it. Here what we can see is a very big phase shift of all the data and that they are aranged in circular way. That's due to the fact that now every sample sees the effect of others samples. 
+        The blue courbes are associated to the training sequence (BPSK), while the other ones to the data (QPSK)
+        
+        fading channel parameters (if we want to put a plot of it after):
+        fading_channel_response(1) = 1;
+        fading_channel_response(280) = 0.55;
+
+    Multipath and time shift:
+        here we have combined the effect of a bad synchronization and a multipath channel. The result shows the linear shift in the phase and the influence of the others samples.
+
+
+

@@ -16,7 +16,7 @@ addpath("images/")
 %% Upload image
 
 rng(123);
-image = imread('lena_256.png');
+image = imread('epfl_256.png');
 gray_image = im2gray(image);
 
 %% Config parameters
@@ -28,7 +28,7 @@ gray_image = im2gray(image);
 %       - ALSA audio tools, most Linux distrubtions
 %       - builtin WAV tools on Windows 
 %   - 'bypass' : no audio transmission, takes txsignal as received signal
-conf.audiosystem = 'bypass'; % Values: 'matlab','native','bypass'
+conf.audiosystem = 'matlab'; % Values: 'matlab','native','bypass'
 conf.bitsps     = 16;
 
 % Image characteristics
@@ -36,9 +36,9 @@ conf.original_image = size(gray_image);
 
 % Frame characteristics 
 conf.preamble_length = 100;
-conf.nb_frames = 1;                                    % Number of frames to send image
-%conf.ofdm_sym_per_frame = 1024 / conf.nb_frames;         % Number of OFDM symbols per frame 
-conf.ofdm_sym_per_frame = 10;         % Number of OFDM symbols per frame 
+conf.nb_frames = 64;                                    % Number of frames to send image
+conf.ofdm_sym_per_frame = 1024 / conf.nb_frames;         % Number of OFDM symbols per frame 
+%conf.ofdm_sym_per_frame = 10;         % Number of OFDM symbols per frame 
 conf.frame_gap = 1000;                                  % Paddding between two frames
 conf.nb_carriers = 256;                                 % Number of symbols per packet (or carriers)
 conf.bits_per_ofdm_sym = conf.nb_carriers * 2;          % Number of bits per paccket
@@ -75,8 +75,8 @@ conf.matched_filter_length_rx = conf.os_factor_preamb * 6;  % Receiver filter le
 
 %% Transmission
 % Transmit
-%bitstream = image2bitstream(conf, gray_image);
-bitstream = randi([0, 1], conf.bits_per_ofdm_sym * conf.ofdm_sym_per_frame, conf.nb_frames);
+bitstream = image2bitstream(conf, gray_image);
+%bitstream = randi([0, 1], conf.bits_per_ofdm_sym * conf.ofdm_sym_per_frame, conf.nb_frames);
 %bitstream = ones(conf.bits_per_ofdm_sym * conf.ofdm_sym_per_frame, conf.nb_frames);
 
 % RF data generation
@@ -139,7 +139,7 @@ fading_channel = fading_channel_sim();
 %figure;
 %stem(fading_channel);
 
-rxsignal = conv(rxsignal, fading_channel, "same");
+%rxsignal = conv(rxsignal, fading_channel, "same");
 
 bitstream_rx = rx(rxsignal, conf);
 bitstream_rx = logical(bitstream_rx);
@@ -175,19 +175,19 @@ title("FFT of the RX signal")
 xlabel("Frequency (Hz)")
 ylabel("|fft(rx\_rf)|")
 
-%output_image = bitstream2image(bitstream_rx(:),conf.original_image);
+output_image = bitstream2image(bitstream_rx(:),conf.original_image);
 
-% figure;
-% plot(tx_rf)
-% title('Transmitted RF Data');
-% xlabel('Sample Index');
-% ylabel('Amplitude');
-% 
-% figure;
-% plot(rxsignal)
-% title('Received RF Data with padding');
-% xlabel('Sample Index');
-% ylabel('Amplitude');
+figure;
+plot(tx_rf)
+title('Transmitted RF Data');
+xlabel('Sample Index');
+ylabel('Amplitude');
+
+figure;
+plot(rxsignal)
+title('Received RF Data with padding');
+xlabel('Sample Index');
+ylabel('Amplitude');
 
 
 %{

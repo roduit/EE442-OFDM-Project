@@ -76,8 +76,8 @@ conf.matched_filter_length_rx = conf.os_factor_preamb * 6;  % Receiver filter le
 
 %% Transmission
 % Transmit
-%bitstream = image2bitstream(conf, gray_image);
-bitstream = randi([0, 1], conf.bits_per_ofdm_sym * conf.ofdm_sym_per_frame, conf.nb_frames);
+bitstream = image2bitstream(conf, gray_image);
+%bitstream = randi([0, 1], conf.bits_per_ofdm_sym * conf.ofdm_sym_per_frame, conf.nb_frames);
 %bitstream = ones(conf.bits_per_ofdm_sym * conf.ofdm_sym_per_frame, conf.nb_frames);
 
 % RF data generation

@@ -188,6 +188,3 @@ xlabel("Time [s]")
 ylabel("Magnitude [dB]");
 title("Fading Channel");
 legend("Real Channel", "Training estimated channel");
-
-
-
