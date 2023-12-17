@@ -23,3 +23,8 @@ Orthogonal Frequency Division Multiplexing (OFDM), widely employed in wireless r
 ## Project strucure
 
 ## Contributors
+
+## TODO : 
+- Add plots for BER as a function of nb symbols
+- Add plots for LENA + EPFL transmission
+- 
