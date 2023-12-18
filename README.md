@@ -52,8 +52,7 @@ Orthogonal Frequency Division Multiplexing (OFDM), widely employed in wireless r
 The folder *laboratories* contains all the laboratories of the course "EE-442: Wireless Receivers: Algorithms and Architectures". Some of the blocks used in the project come from these labs and are properly cited. *Project* folder contains the code and documentation of the proposed project about OFDM. In the *code* subfolders ofdm_main.m computes the solutions and ofdm_multipath.m can be used to generate simulation of a multipath environment.
 
 ## Contributors
+This project has been done by Vincent Roduit and Filippo Quadri as a mandatory part of the course "EE-442: Wireless Receivers: Algorithms and Architectures" given at Ecole Polytechnique Fédérale de Lausanne during the Fall semester of 2023.
 
-## TODO : 
-- Add plots for BER as a function of nb symbols
-- Add plots for LENA + EPFL transmission
-- 
+## Theory and results
+To gain insight into the project and develop an understanding of the results, you can find the report at *project/resources/documents/report.pdf*. Additionally, the PowerPoint presentation may prove helpful for the reader.
