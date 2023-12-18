@@ -16,11 +16,12 @@ EE-442: Wireless Receivers: Algorithms and Architectures
 - [Abstract](#abstract)
 - [Project Structure](#project-structure)
 - [Contributors](#contributors)
+- [Theory and results](#theory-and-results)
 
 ## Abstract 
 Orthogonal Frequency Division Multiplexing (OFDM), widely employed in wireless receivers, is a prominent method for multi-carrier transmission. Specifically, OFDM stands out as a specialized approach within the broader category of multi-carrier transmission methods. The purpose of this project is to implement a OFDM model and study the effect in an acoustic transmission.
 
-## Project strucure
+## Project structure
 ```
 .
 ├── LICENSE
