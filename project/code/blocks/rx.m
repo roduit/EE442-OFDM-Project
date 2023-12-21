@@ -98,6 +98,7 @@ function [rx_bitstream, channel_across_frames, channel_across_frames_time] = rx(
             linearInd = sub2ind(size(deltaTheta), (1:size(deltaTheta, 1))', ind);
             theta = deltaTheta(linearInd);
             channel_phase_est(:, k+1) = mod(0.01 * theta + 0.99 * channel_phase_est(:, k), 2*pi);
+            %channel_phase_est(:, k+1) = channel_phase_est(:, 1);
         end
         
         rx_data = (rx_data ./ channel_mag_est) .* exp(-1j .* channel_phase_est(:, 2:end));
@@ -108,7 +109,7 @@ function [rx_bitstream, channel_across_frames, channel_across_frames_time] = rx(
 
 
     figure;
-    plot(20*log10(abs(channel_across_frames_time(:, 1))))
+    plot(abs(channel_across_frames_time(:, 1)).^2)
     xlabel("Time")
     ylabel("Magnitude");
     title("Fading Channel");

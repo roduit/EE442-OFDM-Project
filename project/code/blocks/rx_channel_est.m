@@ -22,11 +22,13 @@ function [rx_bitstream, channel_mag_est, channel_phase_est, channel_real, channe
     % Date:         [2023-12-05]
     % Version:      [2.6]
     rng(123);
+    image = imread('lena_256.png');
+    gray_image = im2gray(image);
 
     training_seq = preamble_gen(conf.nb_carriers);
     training_seq = bit2bpsk(training_seq);
 
-    bitstream_training = randi([0, 1], conf.bits_per_ofdm_sym * conf.ofdm_sym_per_frame, conf.nb_frames);
+    bitstream_training = image2bitstream(conf, gray_image);
     bitstream_training = bit2qpsk(bitstream_training);
 
     os_training_length = conf.nb_carriers * conf.os_factor_ofdm + conf.cp_length;
@@ -100,9 +102,11 @@ function [rx_bitstream, channel_mag_est, channel_phase_est, channel_real, channe
             [~, ind] = min(abs(deltaTheta - channel_phase_est(:, k)), [], 2);
             linearInd = sub2ind(size(deltaTheta), (1:size(deltaTheta, 1))', ind);
             theta = deltaTheta(linearInd);
-            channel_phase_est(:, k+1) = mod(0.01 * theta + 0.99 * channel_phase_est(:, k), 2*pi);
+            channel_phase_est(:, k+1) = mod(0.2 * theta + 0.8 * channel_phase_est(:, k), 2*pi);
+            % channel_phase_est(:, k+1) = channel_phase_est(:, 1);
         end
         
+        %rx_data = (rx_data ./ channel_mag_est) .* exp(-1j .* channel_phase_est(:, 1));
         rx_data = (rx_data ./ channel_mag_est) .* exp(-1j .* channel_phase_est(:, 2:end));
         rx_bitstream(:,ii) = qpsk2bit(rx_data(:));
 

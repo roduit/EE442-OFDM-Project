@@ -12,7 +12,8 @@
 %%%%%
 
 clear;
-clc
+clc;
+close all;
 
 addpath("blocks/")
 addpath("functions/")
@@ -45,15 +46,15 @@ conf.original_image = size(gray_image);
 % Frame characteristics 
 conf.preamble_length = 100;
 conf.nb_frames = 1;                                    % Number of frames to send image
-%conf.ofdm_sym_per_frame = 1024 / conf.nb_frames;         % Number of OFDM symbols per frame 
-conf.ofdm_sym_per_frame = 100;         % Number of OFDM symbols per frame 
+conf.ofdm_sym_per_frame = 1024 / conf.nb_frames;         % Number of OFDM symbols per frame 
+%conf.ofdm_sym_per_frame = 100;         % Number of OFDM symbols per frame 
 conf.frame_gap = 1000;                                  % Paddding between two frames
 conf.nb_carriers = 256;                                 % Number of symbols per packet (or carriers)
 conf.bits_per_ofdm_sym = conf.nb_carriers * 2;          % Number of bits per paccket
 
 % Frequencies characteristics
 conf.carrier_freq = 8e3;                            % [Hz] : Carrier frequency
-conf.spacing_freq = 5;                              % [Hz] : Spacing frequency
+conf.spacing_freq = 20;                              % [Hz] : Spacing frequency
 conf.sampling_freq = 48e3;                          % [Hz] : Sampling frequency
 
 conf.BW = conf.spacing_freq * conf.nb_carriers; % [Hz] : Bandwidth 
@@ -85,7 +86,8 @@ conf.matched_filter_length_rx = conf.os_factor_preamb * 6;  % Receiver filter le
 
 %% Transmission
 % Transmit
-bitstream = randi([0, 1], conf.bits_per_ofdm_sym * conf.ofdm_sym_per_frame, conf.nb_frames);
+bitstream = image2bitstream(conf, gray_image);
+%bitstream = randi([0, 1], conf.bits_per_ofdm_sym * conf.ofdm_sym_per_frame, conf.nb_frames);
 
 % RF data generation
 tx_rf = tx(bitstream, conf);
@@ -144,9 +146,9 @@ end
 %% Reception
 
 fading_channel = fading_channel_sim();
-rxsignal_sim = conv(rawrxsignal, fading_channel, "same");
+%rxsignal = conv(rawrxsignal, fading_channel, "same");
 
-
+%phase = exp(1j*(pi/8:pi/24/length(rxsignal):pi/6 - pi/24/length(rxsignal)).');
 %[bitstream_rx_bypass, channel_across_frames_bypass, channel_across_frames_time_bypass] = rx(rxsignal_sim, conf);
 
 [bitstream_rx, channel_mag_est, channel_phase_est, channel_real, channel_across_frames_time, complete_channel] = rx_channel_est(rxsignal, conf);
@@ -155,15 +157,18 @@ bitstream_rx = logical(bitstream_rx);
 ber = sum(bitstream(:) ~= bitstream_rx(:)) / length(bitstream(:))
 
 %% Plot results
+output_image = bitstream2image(bitstream_rx(:),conf.original_image);
 
 frequencies = conf.carrier_freq - conf.BW / 2 : conf.spacing_freq : conf.carrier_freq + conf.BW / 2 - conf.spacing_freq;
 channel_across_frames_time_real = ifftshift(ifft(complete_channel));
 
 
 figure;
-plot(20*log10(abs(channel_real)))
+%plot(20*log10(abs(channel_real)))
+plot(abs(channel_real))
 hold on
-yline(20*log10(channel_mag_est(1)), "LineWidth", 3)
+%yline(20*log10(channel_mag_est(1)), "LineWidth", 3)
+yline(channel_mag_est(1), "LineWidth", 3)
 xlabel("OFDM symbol")
 ylabel("Magnitude [dB]");
 title("Channel Magnitude");
@@ -176,7 +181,7 @@ hold on;
 plot(mod(unwrap(channel_phase_est(1, 2:end)), 2*pi) * 180 / pi);
 xlabel("OFDM symbol");
 ylabel("Phase [°]");
-title("Channel Phase");
+title("Channel Phase - No phase tracking");
 legend("Real Channel", "Training estimated channel");
 
 figure;
@@ -186,5 +191,5 @@ hold on
 plot(time_ax, 20*log10(abs(channel_across_frames_time(:, 1))))
 xlabel("Time [s]")
 ylabel("Magnitude [dB]");
-title("Fading Channel");
+title("Fading Channel - No phase tracking");
 legend("Real Channel", "Training estimated channel");

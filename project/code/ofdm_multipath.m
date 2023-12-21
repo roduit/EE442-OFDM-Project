@@ -14,6 +14,9 @@
 clear;
 clc
 %close all;
+addpath("blocks/")
+addpath("functions/")
+addpath("images/")
 %% Upload image
 
 rng(123);
@@ -29,7 +32,7 @@ gray_image = im2gray(image);
 %       - ALSA audio tools, most Linux distrubtions
 %       - builtin WAV tools on Windows 
 %   - 'bypass' : no audio transmission, takes txsignal as received signal
-conf.audiosystem = 'matlab'; % Values: 'matlab','native','bypass'
+conf.audiosystem = 'bypass'; % Values: 'matlab','native','bypass'
 conf.bitsps     = 16;
 
 % Image characteristics
@@ -76,8 +79,8 @@ conf.matched_filter_length_rx = conf.os_factor_preamb * 6;  % Receiver filter le
 
 %% Transmission
 % Transmit
-bitstream = image2bitstream(conf, gray_image);
-%bitstream = randi([0, 1], conf.bits_per_ofdm_sym * conf.ofdm_sym_per_frame, conf.nb_frames);
+%bitstream = image2bitstream(conf, gray_image);
+bitstream = randi([0, 1], conf.bits_per_ofdm_sym * conf.ofdm_sym_per_frame, conf.nb_frames);
 %bitstream = ones(conf.bits_per_ofdm_sym * conf.ofdm_sym_per_frame, conf.nb_frames);
 
 % RF data generation
@@ -145,14 +148,15 @@ rxsignal_sim = conv(rawrxsignal, fading_channel, "same");
 
 [bitstream_rx_bypass, channel_across_frames_bypass, channel_across_frames_time_bypass] = rx(rxsignal_sim, conf);
 
-[bitstream_rx, channel_across_frames, channel_across_frames_time] = rx(rxsignal, conf);
+[bitstream_rx, channel_across_frames, channel_across_frames_time] = rx(rxsignal_sim, conf);
 bitstream_rx = logical(bitstream_rx);
 
 ber = sum(bitstream(:) ~= bitstream_rx(:)) / length(bitstream(:))
 
 figure;
 time_ax = 0: conf.os_factor_ofdm / conf.sampling_freq : (conf.nb_carriers - 1) * conf.os_factor_ofdm / conf.sampling_freq;
-plot(time_ax, 20*log10(abs(channel_across_frames_time(:, 1))))
+plot(time_ax, abs(channel_across_frames_time(:, 1)).^2)
+% plot(time_ax, 20*log10(abs(channel_across_frames_time(:, 1))))
 %hold on
 %plot(20*log10(abs(channel_across_frames_time_bypass(:, 1)) / max(abs(channel_across_frames_time_bypass(:, 1)))));
 xlabel("Time")

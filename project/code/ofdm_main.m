@@ -9,14 +9,14 @@
 
 clear;
 clc
-%close all;
+close all;
 addpath("blocks/")
 addpath("functions/")
 addpath("images/")
 %% Upload image
 
 rng(123);
-image = imread('epfl_256.png');
+image = imread('lena_256.png');
 gray_image = im2gray(image);
 
 %% Config parameters
@@ -28,7 +28,7 @@ gray_image = im2gray(image);
 %       - ALSA audio tools, most Linux distrubtions
 %       - builtin WAV tools on Windows 
 %   - 'bypass' : no audio transmission, takes txsignal as received signal
-conf.audiosystem = 'matlab'; % Values: 'matlab','native','bypass'
+conf.audiosystem = 'bypass'; % Values: 'matlab','native','bypass'
 conf.bitsps     = 16;
 
 % Image characteristics
@@ -36,10 +36,10 @@ conf.original_image = size(gray_image);
 
 % Frame characteristics 
 conf.preamble_length = 100;
-conf.nb_frames = 64;                                    % Number of frames to send image
+conf.nb_frames = 1;                                    % Number of frames to send image
 conf.ofdm_sym_per_frame = 1024 / conf.nb_frames;         % Number of OFDM symbols per frame 
-%conf.ofdm_sym_per_frame = 10;         % Number of OFDM symbols per frame 
-conf.frame_gap = 1000;                                  % Paddding between two frames
+%conf.ofdm_sym_per_frame = 1;         % Number of OFDM symbols per frame 
+conf.frame_gap = 0;                                  % Paddding between two frames
 conf.nb_carriers = 256;                                 % Number of symbols per packet (or carriers)
 conf.bits_per_ofdm_sym = conf.nb_carriers * 2;          % Number of bits per paccket
 
@@ -60,6 +60,7 @@ conf.os_factor_ofdm = conf.sampling_freq / (conf.spacing_freq * conf.nb_carriers
 conf.os_factor_preamb = conf.sampling_freq / conf.symbol_rate_preamb;                  % Oversampling factor preamble
 
 conf.cp_length = conf.nb_carriers / 2 * conf.os_factor_ofdm;                  % [samples]
+%conf.cp_length = 278;                  % [samples]
 
 if mod(conf.os_factor_preamb,1) ~= 0
     disp('WARNING PREAMB: Sampling rate must be a multiple of the symbol rate'); 
@@ -139,7 +140,7 @@ fading_channel = fading_channel_sim();
 %figure;
 %stem(fading_channel);
 
-%rxsignal = conv(rxsignal, fading_channel, "same");
+rxsignal = conv(rxsignal, fading_channel, "same");
 
 bitstream_rx = rx(rxsignal, conf);
 bitstream_rx = logical(bitstream_rx);
