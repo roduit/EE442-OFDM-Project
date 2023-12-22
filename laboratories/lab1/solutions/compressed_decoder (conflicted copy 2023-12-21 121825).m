@@ -1,6 +1,5 @@
 function newimage = compressed_decoder(b,image_size)
 
-
 % error handling
 if length(b) ~= 8 * prod(image_size)
   error('Input vector has wrong size.')
@@ -25,9 +24,9 @@ factor = 0.7;
 data = zeros(8*8,(width*height)/(8*8));
 k = 1;
 
-for rr = 1:8:width % go through rows
-    for cc=1:8:height % go through columns
-        patch       = padded(cc:cc+7,rr:rr+7);
+for rr=1:8:height % go through rows 
+    for cc=1:8:width % go through columns
+        patch       = padded(rr:rr+7,cc:cc+7);
         vector      = reshape(patch,8*8,1);
         data(:,k)   = vector;
         k = k + 1;
@@ -51,10 +50,10 @@ newpadded = zeros(height,width);
 k = 1;
 
 % assemble full image from patches
-for rr=1:8:width % go through rows
-    for cc=1:8:height % go through columns
+for rr=1:8:height % go through rows
+    for cc=1:8:width % go through columns
         patch = newdata(k,:);
-        newpadded(cc:cc+7,rr:rr+7) = reshape(patch,8,8);
+        newpadded(rr:rr+7,cc:cc+7) = reshape(patch,8,8);
         k = k + 1;
     end
 end

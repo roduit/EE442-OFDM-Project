@@ -27,6 +27,7 @@ image = bi2de(b1);
 % reshape into image format
 image = reshape(image, image_size(2), image_size(1)).';
 
-image=image/(2^8-1);%scale greyscale between 0 and 1
+% displax image
+imshow(image,[0 2^8-1]);
 
 return

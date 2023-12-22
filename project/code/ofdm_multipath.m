@@ -13,7 +13,7 @@
 
 clear;
 clc
-%close all;
+close all;
 addpath("blocks/")
 addpath("functions/")
 addpath("images/")
@@ -32,7 +32,7 @@ gray_image = im2gray(image);
 %       - ALSA audio tools, most Linux distrubtions
 %       - builtin WAV tools on Windows 
 %   - 'bypass' : no audio transmission, takes txsignal as received signal
-conf.audiosystem = 'bypass'; % Values: 'matlab','native','bypass'
+conf.audiosystem = 'matlab'; % Values: 'matlab','native','bypass'
 conf.bitsps     = 16;
 
 % Image characteristics
@@ -148,40 +148,40 @@ rxsignal_sim = conv(rawrxsignal, fading_channel, "same");
 
 [bitstream_rx_bypass, channel_across_frames_bypass, channel_across_frames_time_bypass] = rx(rxsignal_sim, conf);
 
-[bitstream_rx, channel_across_frames, channel_across_frames_time] = rx(rxsignal_sim, conf);
+[bitstream_rx, channel_across_frames, channel_across_frames_time] = rx(rxsignal, conf);
 bitstream_rx = logical(bitstream_rx);
 
 ber = sum(bitstream(:) ~= bitstream_rx(:)) / length(bitstream(:))
 
 figure;
-time_ax = 0: conf.os_factor_ofdm / conf.sampling_freq : (conf.nb_carriers - 1) * conf.os_factor_ofdm / conf.sampling_freq;
-plot(time_ax, abs(channel_across_frames_time(:, 1)).^2)
+time_ax = -conf.nb_carriers / 2 : conf.nb_carriers / 2 -1;
+plot(time_ax, abs(channel_across_frames_time(:, 1)) / max(abs(channel_across_frames_time(:, 1))))
 % plot(time_ax, 20*log10(abs(channel_across_frames_time(:, 1))))
-%hold on
-%plot(20*log10(abs(channel_across_frames_time_bypass(:, 1)) / max(abs(channel_across_frames_time_bypass(:, 1)))));
+hold on
+plot(time_ax, abs(channel_across_frames_time_bypass(:, 1)) / max(abs(channel_across_frames_time_bypass(:, 1))));
 xlabel("Time")
 ylabel("Magnitude");
-%legend("Measurement", "Simulation")
-title("Fading Channel");
+legend("Measurement", "Simulation")
+title("Time domain channel response (Taps) - Normalized");
 
 % Plot the channel informations
 frequencies = conf.carrier_freq - conf.BW / 2 : conf.spacing_freq : conf.carrier_freq + conf.BW / 2 - conf.spacing_freq;
 figure;
-plot(frequencies, 20 * log10(abs(channel_across_frames)));
-%hold on
-%plot(frequencies, 20 * log10(abs(channel_across_frames_bypass) / max(abs(channel_across_frames_bypass))));
+plot(frequencies, 20 * log10(abs(channel_across_frames) / max(abs(channel_across_frames))));
+hold on
+plot(frequencies, 20 * log10(abs(channel_across_frames_bypass) / max(abs(channel_across_frames_bypass))));
 xlabel("Frequency [Hz]");
 ylabel("Magnitude [dB]");
-%legend("Measurement", "Simulation")
-title("Channel Magnitude");
+legend("Measurement", "Simulation")
+title("Channel Magnitude - Normalized");
 
 figure;
 plot(frequencies, unwrap(angle(channel_across_frames)) * 180 / pi);
-%hold on
-%plot(frequencies, unwrap(angle(channel_across_frames_bypass)) * 180 / pi);
+hold on
+plot(frequencies, unwrap(angle(channel_across_frames_bypass)) * 180 / pi);
 xlabel("Frequency [Hz]")
 ylabel("Phase [°]");
-%legend("Measurement", "Simulation")
+legend("Measurement", "Simulation")
 title("Channel Phase");
 
 %% Plot results

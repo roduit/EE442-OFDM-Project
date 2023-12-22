@@ -28,7 +28,8 @@ function [rx_bitstream, channel_mag_est, channel_phase_est, channel_real, channe
     training_seq = preamble_gen(conf.nb_carriers);
     training_seq = bit2bpsk(training_seq);
 
-    bitstream_training = image2bitstream(conf, gray_image);
+    %bitstream_training = image2bitstream(conf, gray_image);
+    bitstream_training = randi([0, 1], conf.bits_per_ofdm_sym * conf.ofdm_sym_per_frame, conf.nb_frames);
     bitstream_training = bit2qpsk(bitstream_training);
 
     os_training_length = conf.nb_carriers * conf.os_factor_ofdm + conf.cp_length;

@@ -23,11 +23,16 @@ end
 % convert to uint8
 b1 = reshape(b, 8, length(b)/8).';
 image = bi2de(b1);
+image = uint8(image);
 
 % reshape into image format
 image = reshape(image, image_size(2), image_size(1)).';
 
-% displax image
-%imageview(image);
+% % displax image
+% figure
+% %imageview(image);
+% 
+% a = im2double(image);
+% imshow(a);
 
 return

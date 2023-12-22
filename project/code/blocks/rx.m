@@ -108,30 +108,30 @@ function [rx_bitstream, channel_across_frames, channel_across_frames_time] = rx(
     end
 
 
-    figure;
-    plot(abs(channel_across_frames_time(:, 1)).^2)
-    xlabel("Time")
-    ylabel("Magnitude");
-    title("Fading Channel");
-    
-    % Plot the channel informations
-    frequencies = conf.carrier_freq - conf.BW / 2 : conf.spacing_freq : conf.carrier_freq + conf.BW / 2 - conf.spacing_freq;
-    figure;
-    plot(frequencies, 20 * log10(abs(channel_across_frames)));
-    xlabel("Frequency [Hz]");
-    ylabel("Magnitude [dB]");
-    title("Channel Magnitude");
-
-    figure;
-    plot(frequencies, unwrap(angle(channel_across_frames)) * 180 / pi);
-    xlabel("Frequency [Hz]")
-    ylabel("Phase [°]");
-    title("Channel Phase");
-
-    % Plot the constellation
-    figure;
-    plot(rx_data, 'o');
-    title("Constellation Points at RX") 
+    % figure;
+    % plot(abs(channel_across_frames_time(:, 1)).^2)
+    % xlabel("Time")
+    % ylabel("Magnitude");
+    % title("Fading Channel");
+    % 
+    % % Plot the channel informations
+    % frequencies = conf.carrier_freq - conf.BW / 2 : conf.spacing_freq : conf.carrier_freq + conf.BW / 2 - conf.spacing_freq;
+    % figure;
+    % plot(frequencies, 20 * log10(abs(channel_across_frames)));
+    % xlabel("Frequency [Hz]");
+    % ylabel("Magnitude [dB]");
+    % title("Channel Magnitude");
+    % 
+    % figure;
+    % plot(frequencies, unwrap(angle(channel_across_frames)) * 180 / pi);
+    % xlabel("Frequency [Hz]")
+    % ylabel("Phase [°]");
+    % title("Channel Phase");
+    % 
+    % % Plot the constellation
+    % figure;
+    % plot(rx_data, 'o');
+    % title("Constellation Points at RX") 
 
 
 end

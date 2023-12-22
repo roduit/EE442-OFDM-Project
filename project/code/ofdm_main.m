@@ -28,7 +28,7 @@ gray_image = im2gray(image);
 %       - ALSA audio tools, most Linux distrubtions
 %       - builtin WAV tools on Windows 
 %   - 'bypass' : no audio transmission, takes txsignal as received signal
-conf.audiosystem = 'bypass'; % Values: 'matlab','native','bypass'
+conf.audiosystem = 'matlab'; % Values: 'matlab','native','bypass'
 conf.bitsps     = 16;
 
 % Image characteristics
@@ -45,7 +45,7 @@ conf.bits_per_ofdm_sym = conf.nb_carriers * 2;          % Number of bits per pac
 
 % Frequencies characteristics
 conf.carrier_freq = 8e3;                            % [Hz] : Carrier frequency
-conf.spacing_freq = 5;                              % [Hz] : Spacing frequency
+conf.spacing_freq = 20;                              % [Hz] : Spacing frequency
 conf.sampling_freq = 48e3;                          % [Hz] : Sampling frequency
 
 conf.BW = conf.spacing_freq * conf.nb_carriers; % [Hz] : Bandwidth 
@@ -140,7 +140,7 @@ fading_channel = fading_channel_sim();
 %figure;
 %stem(fading_channel);
 
-rxsignal = conv(rxsignal, fading_channel, "same");
+%rxsignal = conv(rxsignal, fading_channel, "same");
 
 bitstream_rx = rx(rxsignal, conf);
 bitstream_rx = logical(bitstream_rx);
