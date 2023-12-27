@@ -1,5 +1,5 @@
 <div align="center">
-<img src="./project/ressources/images/logo-epfl.png" alt="Example Image" width="192" height="108">
+<img src="./project/ressources/logo-epfl.png" alt="Example Image" width="192" height="108">
 </div>
 
 <div align="center">
@@ -42,13 +42,12 @@ Orthogonal Frequency Division Multiplexing (OFDM), widely employed in wireless r
     │   ├── functions
     │   ├── images
     │   ├── ofdm_main.m
-    │   ├── ofdm_multipath.m
-    │   └── test
+    │   └── ofdm_multipath.m
     └── ressources
+        ├── additional_code
         ├── documents
-        ├── images
-        ├── ofdm_project.ipynb
-        └── tx_rx.pdf
+        ├── image
+        └── logo-epfl.png
 ```
 The folder *laboratories* contains all the laboratories of the course "EE-442: Wireless Receivers: Algorithms and Architectures". Some of the blocks used in the project come from these labs and are properly cited. *Project* folder contains the code and documentation of the proposed project about OFDM. In the *code* subfolders ofdm_main.m computes the solutions and ofdm_multipath.m can be used to generate simulation of a multipath environment.
 
