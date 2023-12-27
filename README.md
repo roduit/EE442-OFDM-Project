@@ -46,7 +46,10 @@ Orthogonal Frequency Division Multiplexing (OFDM), widely employed in wireless r
     └── ressources
         ├── additional_code
         ├── documents
-        ├── image
+        │    ├── wireless_communications_project_presentation.pdf
+        │    ├── wireless_communications_project_report.pdf
+        │    ├── wireless_communications_project_description.pdf
+        │    └── wireless_communications_project_instructions.pdf
         └── logo-epfl.png
 ```
 The folder *laboratories* contains all the laboratories of the course "EE-442: Wireless Receivers: Algorithms and Architectures". Some of the blocks used in the project come from these labs and are properly cited. *Project* folder contains the code and documentation of the proposed project about OFDM. In the *code* subfolders ofdm_main.m computes the solutions and ofdm_multipath.m can be used to generate simulation of a multipath environment.
