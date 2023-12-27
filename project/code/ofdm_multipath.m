@@ -54,10 +54,7 @@ conf.sampling_freq = 48e3;                          % [Hz] : Sampling frequency
 
 conf.BW = conf.spacing_freq * conf.nb_carriers; % [Hz] : Bandwidth 
 
-%conf.symbol_rate_ofdm = 1/conf.BW;                  % [s] : symbol rate OFDM
 conf.symbol_rate_preamb = 1000;                     % [Hz] : symbol rate preamble
-
-%conf.ofdm_symbol_period = conf.nb_carriers * conf.symbol_rate_ofdm; % [s]: OFDM symbol period
 
 % Over-sampling factors
 conf.os_factor_ofdm = conf.sampling_freq / (conf.spacing_freq * conf.nb_carriers); % Oversampling factor OFDM
@@ -79,16 +76,14 @@ conf.matched_filter_length_rx = conf.os_factor_preamb * 6;  % Receiver filter le
 
 %% Transmission
 % Transmit
-%bitstream = image2bitstream(conf, gray_image);
+
 bitstream = randi([0, 1], conf.bits_per_ofdm_sym * conf.ofdm_sym_per_frame, conf.nb_frames);
-%bitstream = ones(conf.bits_per_ofdm_sym * conf.ofdm_sym_per_frame, conf.nb_frames);
 
 % RF data generation
 tx_rf = tx(bitstream, conf);
 
 % pad signal with zeros to simulate delay
 rawtxsignal = [ zeros(conf.sampling_freq,1) ; tx_rf ;  zeros(conf.sampling_freq,1) ];
-%rawtxsignal = tx_rf;
 
 txdur = length(rawtxsignal)/conf.sampling_freq; % calculate length of transmitted signal
 audiowrite('out.wav', rawtxsignal, conf.sampling_freq)
@@ -140,8 +135,6 @@ end
 %% Reception
 
 fading_channel = fading_channel_sim();
-%figure;
-%stem(fading_channel);
 
 rxsignal_sim = conv(rawrxsignal, fading_channel, "same");
 
@@ -156,7 +149,6 @@ ber = sum(bitstream(:) ~= bitstream_rx(:)) / length(bitstream(:))
 figure;
 time_ax = -conf.nb_carriers / 2 : conf.nb_carriers / 2 -1;
 plot(time_ax, abs(channel_across_frames_time(:, 1)) / max(abs(channel_across_frames_time(:, 1))))
-% plot(time_ax, 20*log10(abs(channel_across_frames_time(:, 1))))
 hold on
 plot(time_ax, abs(channel_across_frames_time_bypass(:, 1)) / max(abs(channel_across_frames_time_bypass(:, 1))));
 xlabel("Time")

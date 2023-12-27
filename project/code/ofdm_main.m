@@ -7,6 +7,10 @@
 % Authors : Vincent Roduit, Filippo Quadri
 % % % % %
 
+% % % % %
+% Main file
+% % % % %
+
 clear;
 clc
 close all;
@@ -50,17 +54,14 @@ conf.sampling_freq = 48e3;                          % [Hz] : Sampling frequency
 
 conf.BW = conf.spacing_freq * conf.nb_carriers; % [Hz] : Bandwidth 
 
-%conf.symbol_rate_ofdm = 1/conf.BW;                  % [s] : symbol rate OFDM
 conf.symbol_rate_preamb = 1000;                     % [Hz] : symbol rate preamble
 
-%conf.ofdm_symbol_period = conf.nb_carriers * conf.symbol_rate_ofdm; % [s]: OFDM symbol period
 
 % Over-sampling factors
 conf.os_factor_ofdm = conf.sampling_freq / (conf.spacing_freq * conf.nb_carriers); % Oversampling factor OFDM
 conf.os_factor_preamb = conf.sampling_freq / conf.symbol_rate_preamb;                  % Oversampling factor preamble
 
 conf.cp_length = conf.nb_carriers / 2 * conf.os_factor_ofdm;                  % [samples]
-%conf.cp_length = 278;                  % [samples]
 
 if mod(conf.os_factor_preamb,1) ~= 0
     disp('WARNING PREAMB: Sampling rate must be a multiple of the symbol rate'); 
@@ -77,15 +78,12 @@ conf.matched_filter_length_rx = conf.os_factor_preamb * 6;  % Receiver filter le
 %% Transmission
 % Transmit
 bitstream = image2bitstream(conf, gray_image);
-%bitstream = randi([0, 1], conf.bits_per_ofdm_sym * conf.ofdm_sym_per_frame, conf.nb_frames);
-%bitstream = ones(conf.bits_per_ofdm_sym * conf.ofdm_sym_per_frame, conf.nb_frames);
 
 % RF data generation
 tx_rf = tx(bitstream, conf);
 
 % pad signal with zeros to simulate delay
 rawtxsignal = [ zeros(conf.sampling_freq,1) ; tx_rf ;  zeros(conf.sampling_freq,1) ];
-%rawtxsignal = tx_rf;
 
 txdur = length(rawtxsignal)/conf.sampling_freq; % calculate length of transmitted signal
 audiowrite('out.wav', rawtxsignal, conf.sampling_freq)
@@ -137,10 +135,6 @@ end
 %% Reception
 
 fading_channel = fading_channel_sim();
-%figure;
-%stem(fading_channel);
-
-%rxsignal = conv(rxsignal, fading_channel, "same");
 
 bitstream_rx = rx(rxsignal, conf);
 bitstream_rx = logical(bitstream_rx);
@@ -191,6 +185,7 @@ xlabel('Sample Index');
 ylabel('Amplitude');
 
 
+% Uncomment these line to see other results
 %{
  % Plot RF data
 figure;

@@ -146,10 +146,6 @@ end
 %% Reception
 
 fading_channel = fading_channel_sim();
-%rxsignal = conv(rawrxsignal, fading_channel, "same");
-
-%phase = exp(1j*(pi/8:pi/24/length(rxsignal):pi/6 - pi/24/length(rxsignal)).');
-%[bitstream_rx_bypass, channel_across_frames_bypass, channel_across_frames_time_bypass] = rx(rxsignal_sim, conf);
 
 [bitstream_rx, channel_mag_est, channel_phase_est, channel_real, channel_across_frames_time, complete_channel] = rx_channel_est(rxsignal, conf);
 bitstream_rx = logical(bitstream_rx);
@@ -157,17 +153,14 @@ bitstream_rx = logical(bitstream_rx);
 ber = sum(bitstream(:) ~= bitstream_rx(:)) / length(bitstream(:))
 
 %% Plot results
-%output_image = bitstream2image(bitstream_rx(:),conf.original_image);
 
 frequencies = conf.carrier_freq - conf.BW / 2 : conf.spacing_freq : conf.carrier_freq + conf.BW / 2 - conf.spacing_freq;
 channel_across_frames_time_real = ifftshift(ifft(complete_channel));
 
 
 figure;
-%plot(20*log10(abs(channel_real)))
 plot(abs(channel_real))
 hold on
-%yline(20*log10(channel_mag_est(1)), "LineWidth", 3)
 yline(channel_mag_est(1), "LineWidth", 3)
 xlabel("OFDM symbol")
 ylabel("Magnitude [dB]");
@@ -185,15 +178,8 @@ title("Channel Phase - Phase tracking");
 legend("Real Channel", "Training estimated channel");
 
 figure;
-%time_ax = -conf.nb_carriers * conf.os_factor_ofdm / 2 + conf.os_factor_ofdm : conf.os_factor_ofdm : conf.nb_carriers * conf.os_factor_ofdm / 2;
 time_ax = -conf.nb_carriers / 2 : conf.nb_carriers / 2 -1;
-%time_ax = 0: conf.os_factor_ofdm / conf.sampling_freq : (conf.nb_carriers - 1) * conf.os_factor_ofdm / conf.sampling_freq;
-%plot(time_ax, abs(channel_across_frames_time_real(:, 1)))
-%hold on
 plot(time_ax, abs(channel_across_frames_time(:, 1)))
-%plot(time_ax, 20*log10(abs(channel_across_frames_time(:, 1))))
 xlabel("Taps")
-%ylabel("Magnitude [dB]");
 ylabel("Magnitude");
 title("Time domain channel response (Taps)");
-%legend("Real Channel", "Training estimated channel");
