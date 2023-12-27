@@ -1,3 +1,5 @@
+%Credits: EPFL, Wireless receivers: algorithms and architectures, Andreas Burg
+
 function Y = osifft(X,OS_FACTOR)
 %   OSIFFT(X,,f_sp,f_s) is the inverse transform of X with an over sampling 
 %   factor of OS_FACTOR.

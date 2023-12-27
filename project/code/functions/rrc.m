@@ -1,3 +1,5 @@
+%Credits: EPFL, Wireless receivers: algorithms and architectures, Andreas Burg
+
 function h = rrc(os_factor, rolloff_factor, filterlength)
     % Returns a the FIR coefficients of a Root Raised Cosine filter.
     % os_factor is the oversampling factor, typically set to 4.

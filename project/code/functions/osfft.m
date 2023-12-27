@@ -1,3 +1,5 @@
+%Credits: EPFL, Wireless receivers: algorithms and architectures, Andreas Burg
+
 function Y = osfft(X,OS_FACTOR)
 %   OSFFT(X,OS_FACTOR) is the inverse transform of X with a over sampling 
 %   factor of OS_FACTOR.
